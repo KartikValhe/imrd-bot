@@ -1824,6 +1824,101 @@ body {
         height: 38px;
         font-size: 0.9rem;
     }
+
+    /* Mobile & Tablet Welcome Card - 2-column non-scrollable compact layout */
+    .welcome-card {
+        padding: 0.5rem 0.6rem 0.25rem;
+        max-width: 100%;
+        margin: auto;
+    }
+
+    .welcome-badge {
+        padding: 0.2rem 0.55rem;
+        margin-bottom: 0.35rem;
+        gap: 0.35rem;
+    }
+
+    .welcome-badge-img {
+        width: 16px;
+        height: 16px;
+    }
+
+    .welcome-badge-label {
+        font-size: 0.72rem;
+    }
+
+    .welcome-title {
+        font-size: 1.35rem;
+        margin-bottom: 0.25rem;
+        letter-spacing: -0.01em;
+    }
+
+    .welcome-sub {
+        font-size: 0.78rem;
+        line-height: 1.35;
+        margin-bottom: 0.65rem;
+        max-width: 100%;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .welcome-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.45rem;
+        width: 100%;
+    }
+
+    .welcome-prompt-card {
+        padding: 0.45rem 0.55rem;
+        gap: 0.45rem;
+        border-radius: 10px;
+        min-height: 48px;
+    }
+
+    .welcome-prompt-card:hover {
+        transform: none;
+    }
+
+    .welcome-prompt-card:active {
+        transform: scale(0.98);
+        background: #f8fafc;
+    }
+
+    .prompt-card-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 0.82rem;
+        border-radius: 8px;
+        flex-shrink: 0;
+    }
+
+    .prompt-card-text {
+        gap: 0;
+        min-width: 0;
+    }
+
+    .prompt-card-title {
+        font-size: 0.76rem;
+        line-height: 1.25;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .prompt-card-desc {
+        font-size: 0.67rem;
+        line-height: 1.2;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .prompt-card-arrow {
+        display: none;
+    }
 }
 
 /* Small Mobile (<= 640px) */
@@ -1886,7 +1981,7 @@ body {
     }
 
     .chat-body {
-        padding: 0.85rem 0.65rem 0.65rem;
+        padding: 0.5rem 0.55rem 0.35rem;
     }
 
     .msg-row {
@@ -1909,36 +2004,60 @@ body {
     }
 
     .welcome-card {
-        padding: 1rem 0.5rem;
+        padding: 0.25rem 0.35rem 0.15rem;
     }
 
-    .welcome-icon {
-        width: 52px;
-        height: 52px;
-        font-size: 1.5rem;
-        margin-bottom: 0.75rem;
-        border-radius: 16px;
+    .welcome-badge {
+        padding: 0.16rem 0.48rem;
+        margin-bottom: 0.25rem;
+        gap: 0.3rem;
     }
 
-    .welcome-card h2 {
-        font-size: 1.2rem;
+    .welcome-badge-img {
+        width: 14px;
+        height: 14px;
+    }
+
+    .welcome-badge-label {
+        font-size: 0.68rem;
+    }
+
+    .welcome-title {
+        font-size: 1.18rem;
+        margin-bottom: 0.18rem;
+    }
+
+    .welcome-sub {
+        font-size: 0.72rem;
+        line-height: 1.28;
         margin-bottom: 0.45rem;
     }
 
-    .welcome-card p {
-        font-size: 0.82rem;
-        line-height: 1.55;
-        padding: 0 0.25rem;
+    .welcome-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.35rem;
     }
 
-    .suggestion-chips {
-        margin-top: 1rem;
-        gap: 0.4rem;
+    .welcome-prompt-card {
+        padding: 0.35rem 0.42rem;
+        gap: 0.35rem;
+        min-height: 42px;
+        border-radius: 8px;
     }
 
-    .chip {
-        padding: 0.38rem 0.75rem;
-        font-size: 0.72rem;
+    .prompt-card-icon {
+        width: 26px;
+        height: 26px;
+        font-size: 0.76rem;
+        border-radius: 7px;
+    }
+
+    .prompt-card-title {
+        font-size: 0.71rem;
+    }
+
+    .prompt-card-desc {
+        font-size: 0.63rem;
     }
 
     .chat-footer {
@@ -1974,5 +2093,43 @@ body {
 
     .msg-row {
         max-width: 98%;
+    }
+
+    .welcome-card {
+        padding: 0.15rem 0.2rem 0.1rem;
+    }
+
+    .welcome-title {
+        font-size: 1.05rem;
+    }
+
+    .welcome-sub {
+        font-size: 0.67rem;
+        -webkit-line-clamp: 1;
+        margin-bottom: 0.35rem;
+    }
+
+    .welcome-grid {
+        gap: 0.25rem;
+    }
+
+    .welcome-prompt-card {
+        padding: 0.28rem 0.32rem;
+        gap: 0.25rem;
+        min-height: 38px;
+    }
+
+    .prompt-card-icon {
+        width: 22px;
+        height: 22px;
+        font-size: 0.7rem;
+    }
+
+    .prompt-card-title {
+        font-size: 0.66rem;
+    }
+
+    .prompt-card-desc {
+        font-size: 0.58rem;
     }
 }
