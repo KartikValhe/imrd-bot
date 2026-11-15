@@ -13,19 +13,39 @@ window.GUNi.ChatFooter = function ChatFooter({
     currentLanguage
 }) {
     const [isListening, setIsListening] = useState(false);
+    const [isMobile, setIsMobile] = useState(
+        typeof window !== 'undefined' ? window.innerWidth <= 640 : false
+    );
     const [toastMessage, setToastMessage] = useState('');
     const [showToast, setShowToast] = useState(false);
     const toastTimerRef = useRef(null);
     const recognitionRef = useRef(null);
     const textareaRef = useRef(null);
 
+    // Track screen width for compact mobile placeholder
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 640);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     // Auto-resize textarea to fit multi-line content (Shift+Enter, pasted paragraphs)
     useEffect(() => {
-        if (textareaRef.current) {
-            textareaRef.current.style.height = 'auto';
-            const nextH = Math.min(Math.max(textareaRef.current.scrollHeight, 26), 130);
-            textareaRef.current.style.height = `${nextH}px`;
+        const el = textareaRef.current;
+        if (!el) return;
+
+        // When input is empty, reset inline height so CSS controls clean single-line sizing
+        if (!inputText) {
+            el.style.height = '';
+            return;
         }
+
+        el.style.height = 'auto';
+        const minH = window.innerWidth <= 480 ? 34 : 36;
+        const nextH = Math.min(Math.max(el.scrollHeight, minH), 130);
+        el.style.height = `${nextH}px`;
     }, [inputText]);
 
     const triggerToast = (msg, ms = 3000) => {
@@ -137,20 +157,23 @@ window.GUNi.ChatFooter = function ChatFooter({
         }
     };
 
+    const isMultiline = Boolean(inputText && inputText.includes('\n'));
+    const placeholderText = isListening
+        ? (t?.voiceListening || '🎙️ Listening…')
+        : (isMobile && t?.inputPlaceholderMobile
+            ? t.inputPlaceholderMobile
+            : (t?.inputPlaceholder || "Ask anything about RCPET's IMRD…"));
+
     return (
         <footer className="chat-footer">
             <form id="chat-form" onSubmit={handleSubmit} autoComplete="off">
-                <div className="input-shell">
+                <div className={`input-shell${isMultiline ? ' multiline' : ''}`}>
                     <textarea
                         ref={textareaRef}
                         id="chat-input"
                         className="chat-input"
                         rows="1"
-                        placeholder={
-                            isListening
-                                ? (t?.voiceListening || '🎙️ Listening…')
-                                : (t?.inputPlaceholder || "Ask anything about RCPET's IMRD…")
-                        }
+                        placeholder={placeholderText}
                         aria-label="Chat message input"
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}

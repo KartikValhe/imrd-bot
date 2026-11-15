@@ -49,6 +49,7 @@ window.I18N = {
             }
         ],
         inputPlaceholder: "Ask anything about RCPET's IMRD…",
+        inputPlaceholderMobile: "Ask about RCPET's IMRD…",
         newChat: 'New chat',
         recentChats: 'Recent Chats',
         viewMore: 'View more',
@@ -129,6 +130,7 @@ window.I18N = {
             }
         ],
         inputPlaceholder: 'RCPET IMRD के बारे में कुछ भी पूछें…',
+        inputPlaceholderMobile: 'IMRD के बारे में पूछें…',
         newChat: 'नई चैट',
         recentChats: 'हालिया चैट',
         viewMore: 'और देखें',
@@ -209,6 +211,7 @@ window.I18N = {
             }
         ],
         inputPlaceholder: "RCPET IMRD बद्दल काहीही विचारा…",
+        inputPlaceholderMobile: "IMRD बद्दल विचारा…",
         newChat: 'नवीन संभाषण',
         recentChats: 'मागील संभाषणे',
         viewMore: 'अधिक पहा',
