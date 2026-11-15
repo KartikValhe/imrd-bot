@@ -2,53 +2,53 @@
 window.I18N = {
     en: {
         label: 'English',
-        pageTitle: 'GUNi Assistant - Ganpat University',
-        title: 'GUNi Assistant',
-        brandName: 'GUNi Assistant',
-        brandSub: 'Ganpat University, Mehsana',
+        pageTitle: "IMRD Assistant - RCPET's IMRD College",
+        title: 'IMRD Assistant',
+        brandName: 'IMRD Assistant',
+        brandSub: "RCPET's IMRD, Shirpur",
         officialBadge: 'Official AI Assistant',
         toggleSidebar: 'Toggle sidebar',
         welcomeHeading: 'Hello, how can I help?',
-        welcomeSub: "I'm your official AI assistant for Ganpat University. Ask me about admissions, campus facilities, hostels, bus routes, placements, and courses.",
+        welcomeSub: "I'm your official AI assistant for RCPET's IMRD College, Shirpur. Ask me about admissions, MCA, BCA, BBA, MMS courses, eligibility, fees, library, placements, and campus facilities.",
         promptCards: [
             {
                 icon: 'bi bi-mortarboard-fill',
-                title: 'Streams & Faculties',
-                desc: 'Explore Engineering, Management, Pharmacy & 8+ streams',
-                query: 'How many streams are available at Ganpat University?'
+                title: 'Courses & Programs',
+                desc: 'Explore MCA, BCA, BBA, Integrated MCA, and MMS programs',
+                query: 'What courses and programs are offered at RCPET IMRD?'
             },
             {
                 icon: 'bi bi-pencil-square',
                 title: 'Admissions 2026',
-                desc: 'Eligibility criteria, application portal & process',
-                query: 'What is the admission procedure for Ganpat University?'
+                desc: 'Eligibility criteria, MAH-CET process & required documents',
+                query: 'What is the admission procedure and eligibility for MCA and BCA?'
             },
             {
                 icon: 'bi bi-cash-stack',
                 title: 'Fees & Scholarships',
-                desc: 'Annual tuition fee matrix and MYSY scholarship details',
-                query: 'What are the course fees and available scholarships?'
+                desc: 'Annual fee structure and government scholarship schemes',
+                query: 'What are the fees and available scholarships at RCPET IMRD?'
             },
             {
-                icon: 'bi bi-building-check',
-                title: 'Hostels & Mess',
-                desc: 'Room types, mess fees, safety & campus facilities',
-                query: 'What are the hostel facilities and fees at Ganpat University?'
+                icon: 'bi bi-book-half',
+                title: 'Library & Koha',
+                desc: 'Library books, e-resources, Koha system & opening timings',
+                query: 'What are the library facilities and book borrowing rules?'
             },
             {
                 icon: 'bi bi-briefcase-fill',
-                title: 'Placements & CDC',
-                desc: 'Salary packages, recruiting companies & stats',
-                query: 'Tell me about Ganpat University placements and top recruiters'
+                title: 'Placements & T&P',
+                desc: 'Campus recruitment, top recruiting companies & packages',
+                query: 'Tell me about RCPET IMRD placements and top recruiters'
             },
             {
-                icon: 'bi bi-bus-front-fill',
-                title: 'Bus & Transport',
-                desc: 'Transit pickup routes from Ahmedabad & Mehsana',
-                query: 'What are the transportation bus routes for Ganpat University?'
+                icon: 'bi bi-geo-alt-fill',
+                title: 'Campus & Contact',
+                desc: 'College location at Shirpur, contact numbers & help desk',
+                query: 'Where is RCPET IMRD located and how do I contact the college?'
             }
         ],
-        inputPlaceholder: 'Ask anything about Ganpat University…',
+        inputPlaceholder: "Ask anything about RCPET's IMRD…",
         newChat: 'New chat',
         recentChats: 'Recent Chats',
         viewMore: 'View more',
@@ -82,53 +82,53 @@ window.I18N = {
     },
     hi: {
         label: 'हिन्दी',
-        pageTitle: 'GUNI सहायक - गणपत यूनिवर्सिटी',
-        title: 'GUNI सहायक',
-        brandName: 'GUNI सहायक',
-        brandSub: 'गणपत यूनिवर्सिटी, मेहसाणा',
+        pageTitle: 'IMRD सहायक - आर. सी. पटेल आय.एम.आर.डी., शिरपूर',
+        title: 'IMRD सहायक',
+        brandName: 'IMRD सहायक',
+        brandSub: 'आर. सी. पटेल आय.एम.आर.डी., शिरपूर',
         officialBadge: 'आधिकारिक एआई सहायक',
         toggleSidebar: 'साइडबार टॉगल करें',
         welcomeHeading: 'नमस्ते, मैं आपकी क्या सहायता कर सकता हूँ?',
-        welcomeSub: 'मैं गणपत यूनिवर्सिटी (GUNI) का आधिकारिक एआई सहायक हूँ। मुझसे प्रवेश, कैंपस सुविधाएं, हॉस्टल, बस मार्ग, प्लेसमेंट और पाठ्यक्रमों के बारे में पूछें।',
+        welcomeSub: 'मैं आर. सी. पटेल आय.एम.आर.डी. (RCPET IMRD), शिरपूर का आधिकारिक एआई सहायक हूँ। मुझसे प्रवेश, MCA, BCA, BBA, MMS पाठ्यक्रम, फीस, लाइब्रेरी, प्लेसमेंट और कैंपस के बारे में पूछें।',
         promptCards: [
             {
                 icon: 'bi bi-mortarboard-fill',
-                title: 'स्ट्रीम्स और संकाय',
-                desc: 'इंजीनियरिंग, मैनेजमेंट, फार्मेसी और 8+ संकाय',
-                query: 'गणपत यूनिवर्सिटी में कौन-कौन सी स्ट्रीम्स और संकाय उपलब्ध हैं?'
+                title: 'कोर्स और पाठ्यक्रम',
+                desc: 'MCA, BCA, BBA, Integrated MCA और MMS कार्यक्रम',
+                query: 'RCPET IMRD में कौन-कौन से कोर्स और डिग्री उपलब्ध हैं?'
             },
             {
                 icon: 'bi bi-pencil-square',
                 title: 'प्रवेश 2026',
-                desc: 'पात्रता मापदंड, आवेदन पोर्टल और प्रक्रिया',
-                query: 'गणपत यूनिवर्सिटी में प्रवेश की क्या प्रक्रिया है?'
+                desc: 'पात्रता मापदंड, MAH-CET प्रक्रिया और आवश्यक दस्तावेज',
+                query: 'MCA और BCA में प्रवेश की पात्रता और प्रक्रिया क्या है?'
             },
             {
                 icon: 'bi bi-cash-stack',
                 title: 'फीस और स्कॉलरशिप',
-                desc: 'कोर्स फीस और MYSY सरकारी छात्रवृत्ति विवरण',
-                query: 'कोर्स फीस और उपलब्ध स्कॉलरशिप के बारे में बताएं'
+                desc: 'वार्षिक शिक्षण शुल्क और सरकारी छात्रवृत्ति योजनाएं',
+                query: 'RCPET IMRD में कोर्स की फीस और स्कॉलरशिप क्या हैं?'
             },
             {
-                icon: 'bi bi-building-check',
-                title: 'हॉस्टल और मेस',
-                desc: 'कमरे के प्रकार, मेस शुल्क और कैंपस सुविधाएं',
-                query: 'गणपत यूनिवर्सिटी में हॉस्टल और मेस की क्या सुविधाएं और फीस हैं?'
+                icon: 'bi bi-book-half',
+                title: 'लाइब्रेरी और कोहा',
+                desc: 'पुस्तकालय पुस्तकें, कोहा सॉफ्टवेयर, नियम और समय',
+                query: 'कॉलेज लाइब्रेरी की सुविधाएं, समय और नियम क्या हैं?'
             },
             {
                 icon: 'bi bi-briefcase-fill',
-                title: 'प्लेसमेंट और पैकेज',
-                desc: 'सैलरी पैकेज, टॉप रिक्रूटर्स और कैंपस प्लेसमेंट',
-                query: 'गणपत यूनिवर्सिटी के प्लेसमेंट पैकेज और टॉप रिक्रूटर्स कौन से हैं?'
+                title: 'प्लेसमेंट और ट्रेनिंग',
+                desc: 'कैंपस प्लेसमेंट, प्रमुख रिक्रूटर्स और सैलरी पैकेज',
+                query: 'IMRD कॉलेज के प्लेसमेंट पैकेज और टॉप कंपनियां कौन सी हैं?'
             },
             {
-                icon: 'bi bi-bus-front-fill',
-                title: 'बस और परिवहन',
-                desc: 'अहमदाबाद, गांधीनगर और मेहसाणा से बस रूट्स',
-                query: 'गणपत यूनिवर्सिटी के ट्रांसपोर्टेशन और बस रूट्स क्या हैं?'
+                icon: 'bi bi-geo-alt-fill',
+                title: 'कैंपस और संपर्क',
+                desc: 'शिरपूर कैंपस का पता, हेल्पलाइन और संपर्क विवरण',
+                query: 'RCPET IMRD कहाँ स्थित है और कॉलेज से कैसे संपर्क करें?'
             }
         ],
-        inputPlaceholder: 'गणपत यूनिवर्सिटी के बारे में कुछ भी पूछें…',
+        inputPlaceholder: 'RCPET IMRD के बारे में कुछ भी पूछें…',
         newChat: 'नई चैट',
         recentChats: 'हालिया चैट',
         viewMore: 'और देखें',
@@ -160,84 +160,84 @@ window.I18N = {
         voiceLang: 'hi-IN',
         poweredBy: 'पावर्ड बाय'
     },
-    gu: {
-        label: 'ગુજરાતી',
-        pageTitle: 'GUNI સહાયક - ગણપત યુનિવર્સિટી',
-        title: 'GUNI સહાયક',
-        brandName: 'GUNI સહાયક',
-        brandSub: 'ગણપત યુનિવર્સિટી, મહેસાણા',
-        officialBadge: 'સત્તાવાર AI સહાયક',
-        toggleSidebar: 'સાઇડબાર ટૉગલ કરો',
-        welcomeHeading: 'નમસ્તે, હું તમને કેવી રીતે મદદ કરી શકું?',
-        welcomeSub: 'હું ગણપત યુનિવર્સિટી (GUNI) નો સત્તાવાર AI સહાયક છું. મને પ્રવેશ, કેમ્પસ સુવિધાઓ, હોસ્ટેલ, બસ રૂટ, પ્લેસમેન્ટ અને અભ્યાસક્રમો વિશે પૂછો.',
+    mr: {
+        label: 'मराठी',
+        pageTitle: "IMRD सहाय्यक - आर. सी. पटेल आय.एम.आर.डी., शिरपूर",
+        title: 'IMRD सहाय्यक',
+        brandName: 'IMRD सहाय्यक',
+        brandSub: 'आर. सी. पटेल आय.एम.आर.डी., शिरपूर',
+        officialBadge: 'अधिकृत AI सहाय्यक',
+        toggleSidebar: 'साइडबार टॉगल करा',
+        welcomeHeading: 'नमस्कार, मी तुम्हाला कशी मदत करू शकतो?',
+        welcomeSub: "मी आर. सी. पटेल आय.एम.आर.डी. (RCPET IMRD), शिरपूरचा अधिकृत AI सहाय्यक आहे. मला प्रवेश, MCA, BCA, BBA, MMS अभ्यासक्रम, पात्रता, फी, ग्रंथालय (Library), प्लेसमेंट आणि कॅम्पसबद्दल विचारा.",
         promptCards: [
             {
                 icon: 'bi bi-mortarboard-fill',
-                title: 'સ્ટ્રીમ્સ અને ફેકલ્ટીઓ',
-                desc: 'એન્જિનિયરિંગ, મેનેજમેન્ટ, ફાર્મસી અને 8+ શાખાઓ',
-                query: 'ગણપત યુનિવર્સિટીમાં કઈ કઈ સ્ટ્રીમ્સ અને શાખાઓ ઉપલબ્ધ છે?'
+                title: 'कोर्स आणि अभ्यासक्रम',
+                desc: 'MCA, BCA, BBA, Integrated MCA आणि MMS कोर्सेस',
+                query: 'RCPET IMRD मध्ये कोणते कोर्सेस आणि पदवी उपलब्ध आहेत?'
             },
             {
                 icon: 'bi bi-pencil-square',
-                title: 'પ્રવેશ 2026',
-                desc: 'પ્રવેશ પ્રક્રિયા, પાત્રતા અને ઓનલાઇન અરજી',
-                query: 'ગણપત યુનિવર્સિટીમાં પ્રવેશ પ્રક્રિયા શું છે?'
+                title: 'प्रवेश २०२६ (Admissions)',
+                desc: 'पात्रता निकष, MAH-CET प्रक्रिया आणि आवश्यक कागदपत्रे',
+                query: 'MCA आणि BCA प्रवेशाची पात्रता आणि प्रक्रिया काय आहे?'
             },
             {
                 icon: 'bi bi-cash-stack',
-                title: 'ફી અને સ્કોલરશિપ',
-                desc: 'વાર્ષિક ટ્યુશન ફી અને MYSY શિષ્યવૃત્તિ વિગતો',
-                query: 'કોર્સ ફી અને ઉપલબ્ધ સ્કોલરશિપ વિશે જણાવો'
+                title: 'फी आणि शिष्यवृत्ती',
+                desc: 'वार्षिक शिक्षण शुल्क आणि शासकीय शिष्यवृत्ती योजना',
+                query: 'RCPET IMRD मध्ये कोर्सेसची फी आणि शिष्यवृत्ती कोणती आहे?'
             },
             {
-                icon: 'bi bi-building-check',
-                title: 'હોસ્ટેલ અને મેસ',
-                desc: 'રૂમના પ્રકાર, મેસ ફી અને સુરક્ષા સુવિધાઓ',
-                query: 'ગણપત યુનિવર્સિટીમાં હોસ્ટેલ અને મેસ સુવિધાઓ તેમજ ફી કેટલી છે?'
+                icon: 'bi bi-book-half',
+                title: 'ग्रंथालय आणि कोहा (Library)',
+                desc: 'पुस्तके, कोहा सॉफ्टवेअर, ग्रंथालय नियम आणि वेळा',
+                query: 'कॉलेज ग्रंथालयाची सुविधा, वेळ आणि पुस्तकांचे नियम काय आहेत?'
             },
             {
                 icon: 'bi bi-briefcase-fill',
-                title: 'પ્લેસમેન્ટ અને પેકેજ',
-                desc: 'વાર્ષિક પેકેજ અને મુખ્ય રિક્રુટર કંપનીઓ',
-                query: 'ગણપત યુનિવર્સિટીના પ્લેસમેન્ટ પેકેજ અને ટોપ રિક્રુટર્સ વિશે માહિતી આપો'
+                title: 'प्लेसमेंट आणि ट्रेनिंग',
+                desc: 'कॅम्पस प्लेसमेंट, प्रमुख कंपन्या (TCS, Infosys) व पॅकेज',
+                query: 'IMRD कॉलेजचे प्लेसमेंट रेकॉर्ड आणि टॉप रिक्रूटर्स कोणते आहेत?'
             },
             {
-                icon: 'bi bi-bus-front-fill',
-                title: 'બસ અને પરિવહન',
-                desc: 'અમદાવાદ, ગાંધીનગર અને મહેસાણાથી બસ રૂટ્સ',
-                query: 'ગણપત યુનિવર્સિટીના ટ્રાન્સપોર્ટેશન અને બસ રૂટ્સ વિશે જણાવો'
+                icon: 'bi bi-geo-alt-fill',
+                title: 'कॅम्पस आणि संपर्क',
+                desc: 'शिरपूर कॅम्पसचा पत्ता, संपर्क क्रमांक व हेल्पडेस्क',
+                query: 'RCPET IMRD कुठे आहे आणि कॉलेजशी कसा संपर्क साधावा?'
             }
         ],
-        inputPlaceholder: 'ગણપત યુનિવર્સિટી વિશે કંઈપણ પૂછો…',
-        newChat: 'નવી ચેટ',
-        recentChats: 'તાજેતરની ચેટ્સ',
-        viewMore: 'વધુ જુઓ',
-        showLess: 'ઓછું જુઓ',
-        noChats: 'હજુ સુધી કોઈ ચેટ નથી. શરૂ કરવા માટે પૂછો.',
-        deleteChat: 'ચેટ કાઢી નાખો',
-        guest: 'મહેમાન',
-        sendMessage: 'સંદેશ મોકલો',
-        stopGenerating: 'અટકાવો',
-        voiceInput: 'બોલીને પૂછો',
-        stopListening: 'સાંભળવાનું બંધ કરો',
-        clearInput: 'સાફ કરો',
-        sourcesLabel: 'સત્તાવાર સ્ત્રોત:',
-        copy: 'જવાબ કૉપિ કરો',
-        copied: 'કૉપિ થઈ ગયું',
-        readAloud: 'સાંભળો (ઓડિયો)',
-        stopAudio: 'ઓડિયો અટકાવો',
-        helpful: 'ઉપયોગી (લાઇક)',
-        notHelpful: 'બિનઉપયોગી (ડિસલાઇક)',
-        regenerate: 'ફરીથી જવાબ મેળવો',
-        edit: 'સંદેશ સંપાદિત કરો',
-        saveSubmit: 'સાચવો અને મોકલો',
-        cancel: 'રદ કરો',
-        requestFailed: 'વિનંતી નિષ્ફળ રહી.',
-        retry: 'ફરી પ્રયાસ કરો',
-        voiceListening: '🎙️ સાંભળી રહ્યો છું… હવે ગુજરાતીમાં બોલો',
-        voiceNoSpeech: 'કોઈ અવાજ સંભળાયો નથી. ફરી પ્રયાસ કરો.',
-        voiceUnsupported: 'આ બ્રાઉઝરમાં વૉઇસ ઇનપુટ ઉપલબ્ધ નથી.',
-        voiceLang: 'gu-IN',
-        poweredBy: 'પાવર્ડ બાય'
+        inputPlaceholder: "RCPET IMRD बद्दल काहीही विचारा…",
+        newChat: 'नवीन संभाषण',
+        recentChats: 'मागील संभाषणे',
+        viewMore: 'अधिक पहा',
+        showLess: 'कमी पहा',
+        noChats: 'अद्याप कोणतेही संभाषण नाही. प्रश्न विचारून सुरू करा.',
+        deleteChat: 'संभाषण हटवा',
+        guest: 'अतिथी',
+        sendMessage: 'संदेश पाठवा',
+        stopGenerating: 'थांबवा',
+        voiceInput: 'आवाजाने विचारा',
+        stopListening: 'ऐकणे थांबवा',
+        clearInput: 'साफ करा',
+        sourcesLabel: 'अधिकृत संदर्भ:',
+        copy: 'उत्तर कॉपी करा',
+        copied: 'कॉपी झाले',
+        readAloud: 'ऐका (Audio TTS)',
+        stopAudio: 'आवाज थांबवा',
+        helpful: 'उपयुक्त (Like)',
+        notHelpful: 'अनुपयुक्त (Dislike)',
+        regenerate: 'पुन्हा उत्तर मिळवा',
+        edit: 'संदेश संपादित करा',
+        saveSubmit: 'जतन करा आणि पाठवा',
+        cancel: 'रद्द करा',
+        requestFailed: 'विनंती अयशस्वी झाली.',
+        retry: 'पुन्हा प्रयत्न करा',
+        voiceListening: '🎙️ ऐकत आहे… आता मराठीत बोला',
+        voiceNoSpeech: 'कोणताही आवाज आला नाही. पुन्हा प्रयत्न करा.',
+        voiceUnsupported: 'या ब्राउझरमध्ये व्हॉइस इनपुट समर्थित नाही.',
+        voiceLang: 'mr-IN',
+        poweredBy: 'पावर्ड बाय'
     }
 };

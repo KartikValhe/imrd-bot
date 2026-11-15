@@ -17,6 +17,16 @@ window.GUNi.ChatFooter = function ChatFooter({
     const [showToast, setShowToast] = useState(false);
     const toastTimerRef = useRef(null);
     const recognitionRef = useRef(null);
+    const textareaRef = useRef(null);
+
+    // Auto-resize textarea to fit multi-line content (Shift+Enter, pasted paragraphs)
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            const nextH = Math.min(Math.max(textareaRef.current.scrollHeight, 26), 130);
+            textareaRef.current.style.height = `${nextH}px`;
+        }
+    }, [inputText]);
 
     const triggerToast = (msg, ms = 3000) => {
         setToastMessage(msg);
@@ -131,14 +141,15 @@ window.GUNi.ChatFooter = function ChatFooter({
         <footer className="chat-footer">
             <form id="chat-form" onSubmit={handleSubmit} autoComplete="off">
                 <div className="input-shell">
-                    <input
-                        type="text"
+                    <textarea
+                        ref={textareaRef}
                         id="chat-input"
                         className="chat-input"
+                        rows="1"
                         placeholder={
                             isListening
                                 ? (t?.voiceListening || '🎙️ Listening…')
-                                : (t?.inputPlaceholder || 'Ask anything about Ganpat University…')
+                                : (t?.inputPlaceholder || "Ask anything about RCPET's IMRD…")
                         }
                         aria-label="Chat message input"
                         value={inputText}

@@ -19,12 +19,22 @@ window.GUNi.MessageRow = function MessageRow({
     const [copied, setCopied] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
     const textareaRef = useRef(null);
+    const speechKeepAliveRef = useRef(null);
+
+    const stopSpeaking = () => {
+        if (speechKeepAliveRef.current) {
+            clearInterval(speechKeepAliveRef.current);
+            speechKeepAliveRef.current = null;
+        }
+        if (window.speechSynthesis) {
+            try { window.speechSynthesis.cancel(); } catch {}
+        }
+        setIsSpeaking(false);
+    };
 
     useEffect(() => {
         return () => {
-            if (window.speechSynthesis) {
-                window.speechSynthesis.cancel();
-            }
+            stopSpeaking();
         };
     }, []);
 
@@ -32,12 +42,11 @@ window.GUNi.MessageRow = function MessageRow({
         if (!window.speechSynthesis) return;
 
         if (isSpeaking) {
-            window.speechSynthesis.cancel();
-            setIsSpeaking(false);
+            stopSpeaking();
             return;
         }
 
-        window.speechSynthesis.cancel();
+        stopSpeaking();
         const cleanSpeech = (message.text || '')
             .replace(/https?:\/\/\S+/g, '')
             .replace(/\[(.*?)\]\(.*?\)/g, '$1')
@@ -48,19 +57,39 @@ window.GUNi.MessageRow = function MessageRow({
         if (!cleanSpeech) return;
 
         const utter = new SpeechSynthesisUtterance(cleanSpeech);
-        if (message.language === 'hi' || /[\u0900-\u097F]/.test(cleanSpeech)) {
+        if (message.language === 'mr') {
+            utter.lang = 'mr-IN';
+        } else if (message.language === 'hi' || /[\u0900-\u097F]/.test(cleanSpeech)) {
             utter.lang = 'hi-IN';
-        } else if (message.language === 'gu' || /[\u0A80-\u0AFF]/.test(cleanSpeech)) {
-            utter.lang = 'gu-IN';
         } else {
             utter.lang = 'en-IN';
         }
 
-        utter.onend = () => setIsSpeaking(false);
-        utter.onerror = () => setIsSpeaking(false);
+        utter.onend = () => {
+            if (speechKeepAliveRef.current) clearInterval(speechKeepAliveRef.current);
+            setIsSpeaking(false);
+        };
+        utter.onerror = () => {
+            if (speechKeepAliveRef.current) clearInterval(speechKeepAliveRef.current);
+            setIsSpeaking(false);
+        };
 
         setIsSpeaking(true);
-        window.speechSynthesis.speak(utter);
+
+        // Chrome Web Speech workaround: prevents pauses on long utterances > 15 seconds
+        speechKeepAliveRef.current = setInterval(() => {
+            if (!window.speechSynthesis || !window.speechSynthesis.speaking) {
+                if (speechKeepAliveRef.current) clearInterval(speechKeepAliveRef.current);
+            } else {
+                try { window.speechSynthesis.resume(); } catch {}
+            }
+        }, 8000);
+
+        try {
+            window.speechSynthesis.speak(utter);
+        } catch (err) {
+            stopSpeaking();
+        }
     };
 
     useEffect(() => {
@@ -236,7 +265,7 @@ window.GUNi.MessageRow = function MessageRow({
                             {uniqueSources.slice(0, 3).map((src, sIdx) => (
                                 <a
                                     key={sIdx}
-                                    href={src.url || 'https://www.ganpatuniversity.ac.in'}
+                                    href={src.url || 'https://www.rcpimrd.ac.in'}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="source-pill"

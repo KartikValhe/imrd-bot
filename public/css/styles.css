@@ -13,11 +13,14 @@
     --surface-2: #ffffff;
     --border: #e2e8f0;
     --border-hover: #cbd5e1;
-    --border-glow: rgba(156, 65, 38, 0.18);
-    --accent: #9c4126;
-    --accent2: #83341b;
-    --accent3: #b45309;
-    --user-bubble: #9c4126;
+    --border-glow: rgba(0, 151, 178, 0.22);
+    --accent: #003366;
+    --accent-hover: #002244;
+    --accent2: #0b2948;
+    --accent3: #0097b2;
+    --accent-cyan: #0097b2;
+    --accent-gold: #c59b27;
+    --user-bubble: #003366;
     --ai-bubble: #ffffff;
     --text: #0f172a;
     --muted: #64748b;
@@ -27,7 +30,7 @@
     --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.04);
     --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.06);
     --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.08);
-    --shadow-glow: 0 4px 20px rgba(156, 65, 38, 0.12);
+    --shadow-glow: 0 4px 20px rgba(0, 51, 102, 0.16);
     --radius-xl: 18px;
     --radius-lg: 14px;
     --radius-md: 10px;
@@ -54,7 +57,7 @@ body {
     z-index: 0;
     overflow: hidden;
     pointer-events: none;
-    background: radial-gradient(circle at 50% 0%, rgba(156, 65, 38, 0.03) 0%, transparent 60%);
+    background: radial-gradient(circle at 50% 0%, rgba(0, 151, 178, 0.05) 0%, transparent 60%);
 }
 
 .orb {
@@ -189,9 +192,9 @@ body {
 }
 
 .sidebar-toggle-btn:hover {
-    background: rgba(156, 65, 38, 0.08);
+    background: rgba(0, 151, 178, 0.08);
     color: var(--accent);
-    border-color: rgba(156, 65, 38, 0.3);
+    border-color: rgba(0, 151, 178, 0.3);
 }
 
 .sidebar-toggle-btn .bi-layout-sidebar-inset {
@@ -240,7 +243,7 @@ body {
 
 .sidebar-resizer:hover,
 .app-shell.is-resizing .sidebar-resizer {
-    background: rgba(184, 122, 88, 0.4);
+    background: rgba(0, 151, 178, 0.4);
 }
 
 .sidebar-resizer::after {
@@ -313,8 +316,8 @@ body {
 }
 
 .new-chat-btn:hover {
-    background: rgba(156, 65, 38, 0.06);
-    border-color: rgba(156, 65, 38, 0.3);
+    background: rgba(0, 51, 102, 0.05);
+    border-color: rgba(0, 151, 178, 0.35);
     color: var(--accent);
 }
 
@@ -359,8 +362,8 @@ body {
 }
 
 .history-item.active {
-    background: rgba(184, 122, 88, 0.08);
-    border-color: rgba(184, 122, 88, 0.22);
+    background: rgba(0, 151, 178, 0.08);
+    border-color: rgba(0, 151, 178, 0.25);
     color: var(--accent);
     font-weight: 600;
 }
@@ -401,6 +404,7 @@ body {
 }
 
 .history-row:hover .history-delete,
+.history-row.revealed .history-delete,
 .history-delete:focus-visible {
     opacity: 1;
     pointer-events: auto;
@@ -409,13 +413,6 @@ body {
 .history-delete:hover {
     background: rgba(239, 68, 68, 0.12);
     color: #dc2626;
-}
-
-@media (hover: none) {
-    .history-delete {
-        opacity: 0.65;
-        pointer-events: auto;
-    }
 }
 
 .history-title {
@@ -449,8 +446,8 @@ body {
 }
 
 .history-view-more-btn:hover {
-    background: rgba(184, 122, 88, 0.06);
-    border-color: rgba(184, 122, 88, 0.3);
+    background: rgba(0, 151, 178, 0.08);
+    border-color: rgba(0, 151, 178, 0.3);
     color: var(--accent);
 }
 
@@ -568,7 +565,7 @@ body {
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(184, 122, 88, 0.4) 30%, rgba(217, 119, 6, 0.3) 70%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(0, 151, 178, 0.4) 30%, rgba(0, 51, 102, 0.4) 70%, transparent 100%);
     pointer-events: none;
 }
 
@@ -585,16 +582,16 @@ body {
     gap: 0.5rem;
     padding: 0.35rem 0.75rem;
     border-radius: var(--radius-pill);
-    background: #f1f5f9;
-    border: 1px solid var(--border);
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    background: rgba(0, 151, 178, 0.08);
+    border: 1px solid rgba(0, 151, 178, 0.22);
+    box-shadow: 0 1px 3px rgba(0, 51, 102, 0.04);
     max-width: 100%;
 }
 
 .header-badge-text {
     font-size: 0.82rem;
     font-weight: 600;
-    color: #0f172a;
+    color: var(--accent);
     letter-spacing: -0.01em;
     white-space: nowrap;
     overflow: hidden;
@@ -605,8 +602,8 @@ body {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #10b981;
-    box-shadow: 0 0 8px #10b981;
+    background: var(--accent-cyan, #0097b2);
+    box-shadow: 0 0 8px rgba(0, 151, 178, 0.7);
     animation: pulseDot 2s infinite ease-in-out;
     flex-shrink: 0;
 }
@@ -617,11 +614,13 @@ body {
     100% {
         opacity: 1;
         transform: scale(1);
+        box-shadow: 0 0 8px rgba(0, 151, 178, 0.75);
     }
 
     50% {
-        opacity: 0.5;
-        transform: scale(1.2);
+        opacity: 0.45;
+        transform: scale(0.85);
+        box-shadow: 0 0 3px rgba(0, 151, 178, 0.3);
     }
 }
 
@@ -682,7 +681,7 @@ body {
     background: var(--accent);
     color: #ffffff;
     font-weight: 600;
-    box-shadow: 0 1px 4px rgba(156, 65, 38, 0.25);
+    box-shadow: 0 1px 4px rgba(0, 51, 102, 0.3);
 }
 
 .pill-text-short {
@@ -719,10 +718,17 @@ body {
 
 .icon-btn.menu {
     display: none;
+    color: var(--muted);
 }
 
 .app-shell.sidebar-collapsed .icon-btn.menu {
     display: flex;
+}
+
+.icon-btn.menu:hover {
+    background: rgba(0, 151, 178, 0.08);
+    border-color: rgba(0, 151, 178, 0.3);
+    color: var(--accent);
 }
 
 /* ── MESSAGES AREA ───────────────────────────────────────────────────── */
@@ -815,13 +821,13 @@ body {
 .msg-row.user .msg-avatar {
     background: linear-gradient(135deg, var(--accent), var(--accent2));
     color: #fff;
-    box-shadow: 0 4px 12px rgba(184, 122, 88, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 51, 102, 0.25);
 }
 
 .msg-row.assistant .msg-avatar,
 .typing-row .msg-avatar {
-    background: rgba(184, 122, 88, 0.08);
-    border: 1px solid rgba(184, 122, 88, 0.2);
+    background: rgba(0, 151, 178, 0.08);
+    border: 1px solid rgba(0, 151, 178, 0.2);
     color: var(--accent);
 }
 
@@ -846,7 +852,7 @@ body {
     background: var(--user-bubble);
     color: #ffffff;
     border-radius: 18px 18px 4px 18px;
-    box-shadow: 0 2px 10px rgba(156, 65, 38, 0.2);
+    box-shadow: 0 2px 10px rgba(0, 51, 102, 0.22);
     font-weight: 400;
 }
 
@@ -900,8 +906,8 @@ body {
 }
 
 .source-pill:hover {
-    background: rgba(156, 65, 38, 0.08);
-    border-color: rgba(156, 65, 38, 0.3);
+    background: rgba(0, 151, 178, 0.08);
+    border-color: rgba(0, 151, 178, 0.3);
     color: var(--accent);
     transform: translateY(-1px);
 }
@@ -1008,8 +1014,8 @@ body {
 .msg-action-btn.active-speaking {
     opacity: 1;
     color: var(--accent);
-    background: rgba(156, 65, 38, 0.12);
-    border-color: rgba(156, 65, 38, 0.3);
+    background: rgba(0, 151, 178, 0.12);
+    border-color: rgba(0, 151, 178, 0.3);
     animation: pulseSpeaking 1.5s infinite ease-in-out;
 }
 
@@ -1054,7 +1060,7 @@ body {
     flex-direction: column;
     width: 100%;
     background: #ffffff;
-    border: 1px solid rgba(184, 122, 88, 0.35);
+    border: 1px solid rgba(0, 151, 178, 0.35);
     border-radius: 16px;
     padding: 0.75rem 0.85rem 0.55rem;
     box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
@@ -1063,7 +1069,7 @@ body {
 
 .msg-editor:focus-within {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(184, 122, 88, 0.12), 0 4px 16px rgba(184, 122, 88, 0.06);
+    box-shadow: 0 0 0 3px rgba(0, 151, 178, 0.15), 0 4px 16px rgba(0, 51, 102, 0.08);
 }
 
 .msg-edit-input {
@@ -1120,11 +1126,11 @@ body {
     background: linear-gradient(135deg, var(--accent), var(--accent2));
     border: none;
     color: #fff;
-    box-shadow: 0 2px 8px rgba(184, 122, 88, 0.25);
+    box-shadow: 0 2px 8px rgba(0, 51, 102, 0.25);
 }
 
 .msg-edit-send:hover {
-    box-shadow: 0 4px 14px rgba(184, 122, 88, 0.35);
+    box-shadow: 0 4px 14px rgba(0, 51, 102, 0.35);
 }
 
 .msg-row.assistant .msg-bubble {
@@ -1222,7 +1228,7 @@ body {
     color: var(--accent);
     font-weight: 500;
     text-decoration: underline;
-    text-decoration-color: rgba(184, 122, 88, 0.45);
+    text-decoration-color: rgba(0, 151, 178, 0.45);
     text-underline-offset: 3px;
     word-break: break-all;
     overflow-wrap: anywhere;
@@ -1355,19 +1361,19 @@ body {
 .input-shell {
     position: relative;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     gap: 0.5rem;
     background: #ffffff;
     border: 1.5px solid #cbd5e1;
-    border-radius: var(--radius-pill);
-    padding: 0.42rem 0.5rem 0.42rem 1.15rem;
+    border-radius: 24px;
+    padding: 0.38rem 0.5rem 0.38rem 1.15rem;
     box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
     transition: border-color var(--transition), box-shadow var(--transition);
 }
 
 .input-shell:focus-within {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(156, 65, 38, 0.12), 0 4px 16px rgba(156, 65, 38, 0.06);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 3px rgba(0, 151, 178, 0.18), 0 4px 16px rgba(0, 51, 102, 0.08);
 }
 
 .chat-input {
@@ -1377,9 +1383,14 @@ body {
     color: var(--text);
     font-family: inherit;
     font-size: 15px;
+    line-height: 1.45;
     outline: none;
-    padding: 0.4rem 0;
+    padding: 0.45rem 0;
     min-width: 0;
+    resize: none;
+    height: 26px;
+    max-height: 130px;
+    overflow-y: auto;
 }
 
 .chat-input::placeholder {
@@ -1400,6 +1411,7 @@ body {
     border-radius: 50%;
     transition: all var(--transition);
     flex-shrink: 0;
+    margin-bottom: 5px;
 }
 
 .input-clear-btn:hover {
@@ -1425,8 +1437,8 @@ body {
 }
 
 .input-action-btn:hover {
-    background: rgba(156, 65, 38, 0.08);
-    border-color: rgba(156, 65, 38, 0.3);
+    background: rgba(0, 151, 178, 0.08);
+    border-color: rgba(0, 151, 178, 0.3);
     color: var(--accent);
 }
 
@@ -1435,7 +1447,7 @@ body {
     height: 38px;
     border-radius: 50%;
     border: none;
-    background: var(--accent);
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
     color: #fff;
     display: flex;
     align-items: center;
@@ -1446,14 +1458,14 @@ body {
     position: relative;
     overflow: hidden;
     transition: all var(--transition);
-    box-shadow: 0 2px 8px rgba(156, 65, 38, 0.25);
+    box-shadow: 0 2px 8px rgba(0, 51, 102, 0.28);
     touch-action: manipulation;
 }
 
 .send-btn:hover:not(:disabled) {
-    background: var(--accent-hover);
+    background: linear-gradient(135deg, #004b87, var(--accent));
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(156, 65, 38, 0.35);
+    box-shadow: 0 4px 14px rgba(0, 151, 178, 0.35);
 }
 
 .send-btn:active:not(:disabled) {
@@ -1634,18 +1646,18 @@ body {
 }
 
 .welcome-prompt-card:hover {
-    border-color: var(--accent);
-    background: #fdfcfb;
+    border-color: var(--accent-cyan);
+    background: #ffffff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 14px rgba(156, 65, 38, 0.08);
+    box-shadow: 0 4px 16px rgba(0, 51, 102, 0.1);
 }
 
 .prompt-card-icon {
     width: 36px;
     height: 36px;
     border-radius: var(--radius-md);
-    background: rgba(156, 65, 38, 0.08);
-    color: var(--accent);
+    background: rgba(0, 151, 178, 0.1);
+    color: #007a93;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1655,7 +1667,7 @@ body {
 }
 
 .welcome-prompt-card:hover .prompt-card-icon {
-    background: var(--accent);
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
     color: #ffffff;
 }
 
@@ -1693,12 +1705,9 @@ body {
 }
 
 .welcome-prompt-card:hover .prompt-card-arrow {
-    color: var(--accent);
+    color: var(--accent-cyan);
     opacity: 1;
     transform: translate(2px, -2px);
-}
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(184, 122, 88, 0.12);
 }
 
 /* ── COMPREHENSIVE RESPONSIVE BREAKPOINTS ───────────────────────────── */
@@ -1733,6 +1742,19 @@ body {
         transform: translateX(0);
     }
 
+    /* Mobile sidebar: delete button hidden by default, shown on hover, swipe-reveal or focus */
+    .history-delete {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .history-row:hover .history-delete,
+    .history-row.revealed .history-delete,
+    .history-delete:focus-visible {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+
     .sidebar-backdrop {
         display: none;
         position: fixed;
@@ -1741,6 +1763,9 @@ body {
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(4px);
         z-index: 250;
+        cursor: pointer;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .sidebar-backdrop.show {

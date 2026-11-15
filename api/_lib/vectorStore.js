@@ -29,7 +29,9 @@ function buildBm25Index(items) {
 
   let totalLength = 0;
   for (let i = 0; i < N; i++) {
-    const raw = `${items[i].metadata?.page_title || ''} ${items[i].metadata?.section || ''} ${items[i].metadata?.category || ''} ${items[i].text}`;
+    const title = items[i].metadata?.page_title || '';
+    const section = items[i].metadata?.section || '';
+    const raw = `${title} ${title} ${section} ${section} ${items[i].metadata?.category || ''} ${items[i].text}`;
     const tokens = tokenize(raw);
     docLengths[i] = tokens.length;
     totalLength += tokens.length;

@@ -42,9 +42,10 @@ window.GUNi.ChatBody = function ChatBody({
         prevMessagesLength.current = messages.length;
     }, [messages, isTyping]);
 
-    const hasMessages = messages && messages.length > 0;
+    const safeMessages = Array.isArray(messages) ? messages : [];
+    const hasMessages = safeMessages.length > 0;
     const lastAssistantIdx = hasMessages
-        ? messages.map((m) => m.sender).lastIndexOf('assistant')
+        ? safeMessages.map((m) => m ? m.sender : '').lastIndexOf('assistant')
         : -1;
 
     return (
@@ -53,7 +54,7 @@ window.GUNi.ChatBody = function ChatBody({
                 <window.GUNi.WelcomeCard t={t} onSelectChip={onSelectChip} />
             ) : (
                 <>
-                    {messages.map((msg, idx) => (
+                    {safeMessages.map((msg, idx) => (
                         <window.GUNi.MessageRow
                             key={msg.id || idx}
                             index={idx}

@@ -1,11 +1,11 @@
-// LanguageToggle.js - Segmented pill switch for English, Hindi, and Gujarati
+// LanguageToggle.js - Segmented pill switch for English, Hindi, and Marathi
 window.GUNi = window.GUNi || {};
 
 window.GUNi.LanguageToggle = function LanguageToggle({ currentLanguage, onLanguageChange }) {
     const languages = [
         { code: 'en', full: 'English', short: 'EN', title: 'Switch to English' },
         { code: 'hi', full: 'हिन्दी', short: 'HI', title: 'हिन्दी में बदलें' },
-        { code: 'gu', full: 'ગુજરાતી', short: 'GU', title: 'ગુજરાતીમાં બદલો' }
+        { code: 'mr', full: 'मराठी', short: 'MR', title: 'मराठीत बदला' }
     ];
 
     return (

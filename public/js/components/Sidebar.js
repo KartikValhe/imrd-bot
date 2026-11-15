@@ -23,6 +23,13 @@ window.GUNi.Sidebar = function Sidebar({
                 className={`sidebar-backdrop${isOpenMobile ? ' show' : ''}`}
                 id="sidebar-backdrop"
                 onClick={onCloseMobile}
+                onTouchEnd={(e) => {
+                    e.preventDefault();
+                    onCloseMobile();
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={t?.closeSidebar || "Close sidebar"}
             ></div>
 
             <aside className={`sidebar${isOpenMobile ? ' open' : ''}`} id="sidebar">

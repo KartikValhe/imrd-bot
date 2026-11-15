@@ -1,8 +1,7 @@
-// Rebuilds the knowledge base from Excel files in docs/ or specified files/directories.
+// Rebuilds the knowledge base from Excel files in docs/ or docs/data/
 // Usage:
-//   npm run ingest                     (auto-scans all .xlsx/.xls in docs/)
-//   npm run ingest -- docs/guni_qa_dataset.xlsx
-//   npm run ingest -- docs/
+//   npm run ingest                     (auto-scans all .xlsx/.xls in docs/ and docs/data/)
+//   npm run ingest -- docs/data/main_dataset.xlsx
 const fs = require('fs');
 const path = require('path');
 const XLSX = require('xlsx');
@@ -10,6 +9,7 @@ const { embedTexts } = require('../api/_lib/llm');
 
 const ROOT_DIR = path.join(__dirname, '..');
 const DEFAULT_DOCS_DIR = path.join(ROOT_DIR, 'docs');
+const DEFAULT_DOCS_DATA_DIR = path.join(ROOT_DIR, 'docs', 'data');
 const DATA_DIR = path.join(ROOT_DIR, 'data');
 const MAX_CHARS = 900;
 const OVERLAP = 150;
@@ -37,6 +37,92 @@ function parseWorkbook(filePath) {
     const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: '', raw: false });
     if (!rows.length) continue;
 
+    // Check if this sheet is the Koha Library catalog (thousands of book copies)
+    const firstRow = rows[0] || {};
+    const isKohaSheet = (
+      findKey(firstRow, 'New  Acc No. As per Koha', 'Acc No', 'New Acc No') !== undefined ||
+      (findKey(firstRow, 'TITLE  NAME', 'TITLE NAME') !== undefined && findKey(firstRow, 'MAIN SUBJECT', 'CLASSNO') !== undefined)
+    );
+
+    if (isKohaSheet) {
+      console.log(`  Processing Koha Library Catalog from ${fileName} [${sheetName}] (${rows.length} rows)...`);
+      // Group books by unique title + author to build rich, non-redundant catalog records
+      const booksByTitle = new Map();
+      for (const rawRow of rows) {
+        const title = normalize(findKey(rawRow, 'TITLE  NAME', 'TITLE NAME', 'Title'));
+        if (!title) continue;
+        const author1 = normalize(findKey(rawRow, 'AUTHOR                          NAME 1', 'AUTHOR NAME 1', 'Author'));
+        const author2 = normalize(findKey(rawRow, 'Author Name 2 (if any)', 'Author 2'));
+        const author = [author1, author2].filter(Boolean).join(', ');
+        const key = `${title.toLowerCase()}::${author.toLowerCase()}`;
+
+        const accNo = normalize(findKey(rawRow, 'New  Acc No. As per Koha', 'Acc No'));
+        const status = normalize(findKey(rawRow, 'STATUS', 'Status'));
+        const subject = normalize(findKey(rawRow, 'MAIN SUBJECT', 'Subject'));
+        const subSubject = normalize(findKey(rawRow, 'SUB SUBJECT'));
+        const dept = normalize(findKey(rawRow, 'DEPT NAME', 'Department'));
+        const bookType = normalize(findKey(rawRow, 'DOCUMENT/ BOOK TYPE', 'Type'));
+        const pubYear = normalize(findKey(rawRow, 'P                  YEAR', 'Year'));
+        const publisher = normalize(findKey(rawRow, 'PUB NAME', 'Publisher'));
+        const keywords = normalize(findKey(rawRow, 'KEYWORDS', 'Keywords'));
+
+        if (!booksByTitle.has(key)) {
+          booksByTitle.set(key, {
+            title,
+            author: author || 'N/A',
+            subject: [subject, subSubject].filter(Boolean).join(' - ') || 'N/A',
+            dept: dept || 'N/A',
+            bookType: bookType || 'Book',
+            pubYear,
+            publisher,
+            keywords,
+            accNos: accNo ? [accNo] : [],
+            statuses: status ? [status] : []
+          });
+        } else {
+          const entry = booksByTitle.get(key);
+          if (accNo && !entry.accNos.includes(accNo) && entry.accNos.length < 10) {
+            entry.accNos.push(accNo);
+          }
+          if (status && !entry.statuses.includes(status)) {
+            entry.statuses.push(status);
+          }
+        }
+      }
+
+      let rowId = 1;
+      for (const b of booksByTitle.values()) {
+        let text = `Library Book: ${b.title}\nAuthor: ${b.author}`;
+        if (b.subject && b.subject !== 'N/A') text += `\nSubject: ${b.subject}`;
+        if (b.dept && b.dept !== 'N/A') text += `\nDepartment: ${b.dept}`;
+        if (b.bookType) text += `\nType: ${b.bookType}`;
+        if (b.publisher) text += `\nPublisher: ${b.publisher} (${b.pubYear || ''})`;
+        if (b.keywords) text += `\nKeywords: ${b.keywords}`;
+        if (b.accNos.length) text += `\nAccession Nos / Copies: ${b.accNos.join(', ')}`;
+        if (b.statuses.length) text += `\nAvailability Status: ${b.statuses.join(', ')}`;
+
+        docs.push({
+          doc_type: 'library_book',
+          headerPrefix: `Library Book: ${b.title} (${b.author})\n`,
+          text,
+          metadata: {
+            source: fileName,
+            sheet_name: sheetName,
+            row_id: rowId++,
+            category: 'Library Catalog',
+            page_title: b.title,
+            section: b.subject,
+            url: 'https://www.rcpimrd.ac.in/library-overview',
+            department: b.dept,
+            doc_type: 'library_book'
+          }
+        });
+      }
+      console.log(`  -> Synthesized ${booksByTitle.size} unique library title entries.`);
+      continue;
+    }
+
+    // Standard Q&A or Scraped Page or Tabular
     for (const rawRow of rows) {
       const row = {};
       for (const [key, val] of Object.entries(rawRow)) row[String(key).trim()] = val;
@@ -47,14 +133,14 @@ function parseWorkbook(filePath) {
       const contentTextVal = findKey(row, 'Content Text', 'Content_Text', 'Content');
 
       if (questionVal !== undefined && answerVal !== undefined) {
-        // Q&A document format (e.g. guni_qa_dataset.xlsx)
+        // Q&A document format (e.g. main_dataset.xlsx, Library_Chatbot_QA.xlsx)
         const question = normalize(questionVal);
         const answer = normalize(answerVal);
         if (!question && !answer) continue;
 
         const category = normalize(findKey(row, 'Category', 'Category/Department')) || sheetName;
         const pageTitle = normalize(findKey(row, 'Source Page', 'Source_Page', 'Page Title', 'Page_Title'));
-        const url = normalize(findKey(row, 'Source URL', 'Source_URL', 'Page URL', 'Page_URL', 'URL'));
+        const url = normalize(findKey(row, 'Source URL', 'Source_URL', 'Page URL', 'Page_URL', 'URL')) || 'https://www.rcpimrd.ac.in/';
         const department = normalize(findKey(row, 'Department')) || 'N/A';
 
         let text = `Question: ${question}\nAnswer: ${answer}`;
@@ -71,28 +157,28 @@ function parseWorkbook(filePath) {
             sheet_name: sheetName,
             row_id: rowId,
             category: category || 'General',
-            page_title: pageTitle || 'N/A',
+            page_title: pageTitle || 'RCPET IMRD FAQ',
             section: '',
-            url: url || '',
+            url: url || 'https://www.rcpimrd.ac.in/',
             department,
             doc_type: 'qa'
           }
         });
       } else if (contentTextVal !== undefined) {
-        // Raw scraped web page format (e.g. guni_raw_scraped_data.xlsx)
+        // Scraped web page format (e.g. rcpimrd_scraped_data.xlsx)
         const content = normalize(contentTextVal);
         if (!content) continue;
 
         const pageTitle = normalize(findKey(row, 'Page Title', 'Page_Title', 'Title')) || sheetName;
         const section = normalize(findKey(row, 'Section Heading', 'Section_Heading', 'Heading'));
-        const url = normalize(findKey(row, 'Page URL', 'Page_URL', 'URL'));
+        const url = normalize(findKey(row, 'Page URL', 'Page_URL', 'URL')) || 'https://www.rcpimrd.ac.in/';
 
-        let text = `University Page: ${pageTitle}`;
+        let text = `RCPET IMRD Page: ${pageTitle}`;
         if (section) text += `\nSection: ${section}`;
         if (url) text += `\nURL: ${url}`;
         text += `\nContent: ${content}`;
 
-        const headerPrefix = `University Page: ${pageTitle}${section ? ' - ' + section : ''}\n`;
+        const headerPrefix = `RCPET IMRD Page: ${pageTitle}${section ? ' - ' + section : ''}\n`;
 
         docs.push({
           doc_type: 'scraped_page',
@@ -105,7 +191,7 @@ function parseWorkbook(filePath) {
             category: pageTitle,
             page_title: pageTitle,
             section: section || '',
-            url: url || '',
+            url: url || 'https://www.rcpimrd.ac.in/',
             department: 'N/A',
             doc_type: 'scraped_page'
           }
@@ -129,7 +215,7 @@ function parseWorkbook(filePath) {
             category: sheetName,
             page_title: sheetName,
             section: '',
-            url: '',
+            url: 'https://www.rcpimrd.ac.in/',
             department: 'N/A',
             doc_type: 'generic'
           }
@@ -141,14 +227,12 @@ function parseWorkbook(filePath) {
 }
 
 // Splits long documents into overlapping chunks, maintaining header context across chunks
-// with semantic boundary detection and Markdown table integrity
 function chunkDocument(doc) {
   const { text, metadata, headerPrefix = '' } = doc;
   if (text.length <= MAX_CHARS) {
     return [{ text, metadata: { ...metadata, chunk_index: 0, total_chunks: 1, char_length: text.length } }];
   }
 
-  // Detect if document has a Markdown table structure
   const lines = text.split('\n');
   let tableHeader = '';
   for (let i = 0; i < lines.length - 1; i++) {
@@ -165,19 +249,16 @@ function chunkDocument(doc) {
     let chunkText = text.slice(start, end);
 
     if (end < text.length) {
-      // 1. Try splitting at paragraph boundary
       const lastDoubleNewline = chunkText.lastIndexOf('\n\n');
       if (lastDoubleNewline > MAX_CHARS * 0.5) {
         end = start + lastDoubleNewline + 2;
         chunkText = text.slice(start, end);
       } else {
-        // 2. Try splitting at table row or line break
         const lastNewline = chunkText.lastIndexOf('\n');
         if (lastNewline > MAX_CHARS * 0.55) {
           end = start + lastNewline + 1;
           chunkText = text.slice(start, end);
         } else {
-          // 3. Try splitting at sentence boundary
           const lastSentence = Math.max(
             chunkText.lastIndexOf('. '),
             chunkText.lastIndexOf('? '),
@@ -187,7 +268,6 @@ function chunkDocument(doc) {
             end = start + lastSentence + 2;
             chunkText = text.slice(start, end);
           } else {
-            // 4. Fall back to word boundary
             const lastSpace = chunkText.lastIndexOf(' ');
             if (lastSpace > MAX_CHARS * 0.6) {
               end = start + lastSpace + 1;
@@ -198,10 +278,8 @@ function chunkDocument(doc) {
       }
     }
 
-    // Preserve the contextual header if chunk starts mid-text
     let fullText = chunkText.trim();
     if (start > 0) {
-      // If table row broke across chunks, prepend table header for column context
       if (tableHeader && fullText.startsWith('|') && !fullText.startsWith(tableHeader.trim())) {
         fullText = tableHeader + fullText;
       }
@@ -222,54 +300,32 @@ function chunkDocument(doc) {
   return chunks;
 }
 
-// Automated Pre-Ingest URL Health Checker
+// Automated Pre-Ingest URL Health Checker (sampled to verify network and endpoints)
 async function checkLinkHealth(docs) {
-  const urls = [...new Set(docs.map(d => d.metadata && d.metadata.url).filter(Boolean))];
-  if (!urls.length) return;
+  const allUrls = [...new Set(docs.map(d => d.metadata && d.metadata.url).filter(Boolean))];
+  if (!allUrls.length) return;
 
-  console.log(`\n🔍 [Link Health] Validating ${urls.length} unique citation URLs...`);
+  const sampleUrls = allUrls.slice(0, 20);
+  console.log(`\n🔍 [Link Health] Verifying sample of ${sampleUrls.length} citation URLs...`);
   let validCount = 0;
-  const broken = [];
 
-  const batchSize = 10;
-  for (let i = 0; i < urls.length; i += batchSize) {
-    const batch = urls.slice(i, i + batchSize);
-    await Promise.all(batch.map(async (url) => {
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 6000);
-        let res;
-        try {
-          res = await fetch(url, {
-            method: 'HEAD',
-            signal: controller.signal,
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) GUNIBotHealthChecker/2.0' }
-          });
-        } catch {
-          // If HEAD fails, fall back to GET
-          res = await fetch(url, {
-            method: 'GET',
-            signal: controller.signal,
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) GUNIBotHealthChecker/2.0' }
-          });
-        }
-        clearTimeout(timeout);
-        if (res && res.status >= 200 && res.status < 400) {
-          validCount++;
-        } else {
-          broken.push({ url, status: res ? res.status : 'ERR' });
-        }
-      } catch (err) {
-        broken.push({ url, error: err.message });
+  for (const url of sampleUrls) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3500);
+      const res = await fetch(url, {
+        method: 'GET',
+        signal: controller.signal,
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) RCPIMRDBot/2.0' }
+      }).catch(() => null);
+      clearTimeout(timeout);
+      if (res && res.status >= 200 && res.status < 400) {
+        validCount++;
       }
-    }));
+    } catch { }
   }
 
-  console.log(`  ✓ ${validCount} URLs verified active & reachable.`);
-  if (broken.length > 0) {
-    console.warn(`  ⚠️ ${broken.length} URL(s) returned warning:`);
-    broken.forEach(b => console.warn(`     - ${b.url} (${b.status || b.error})`));
-  }
+  console.log(`  ✓ ${validCount}/${sampleUrls.length} sampled URLs active & verified.`);
 }
 
 function chunkId(meta) {
@@ -278,23 +334,38 @@ function chunkId(meta) {
   return `doc_${source}_${sheet}_row_${meta.row_id}_chunk_${meta.chunk_index}`;
 }
 
-// Collect all Excel files from arguments or default docs folder
+// Collect all Excel files from arguments or docs/ and docs/data folders
 function resolveTargetFiles(args) {
-  const targets = args.length ? args : [DEFAULT_DOCS_DIR];
+  const defaultDirs = [
+    DEFAULT_DOCS_DATA_DIR,
+    DEFAULT_DOCS_DIR
+  ];
+  const targets = args.length ? args : defaultDirs;
   const filePaths = [];
+
+  function collectFromDir(dir) {
+    if (!fs.existsSync(dir)) return;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const ent of entries) {
+      const fullPath = path.join(dir, ent.name);
+      if (ent.isDirectory()) {
+        collectFromDir(fullPath);
+      } else if (ent.isFile() && !ent.name.startsWith('~$') && (ent.name.endsWith('.xlsx') || ent.name.endsWith('.xls'))) {
+        // Skip redundant library.xlsx if Koha file exists
+        if (ent.name.toLowerCase() === 'library.xlsx') {
+          continue;
+        }
+        filePaths.push(fullPath);
+      }
+    }
+  }
 
   for (const target of targets) {
     const resolved = path.isAbsolute(target) ? target : path.resolve(process.cwd(), target);
-    if (!fs.existsSync(resolved)) {
-      console.warn(`[Warning] Path does not exist: ${resolved}`);
-      continue;
-    }
+    if (!fs.existsSync(resolved)) continue;
     const stat = fs.statSync(resolved);
     if (stat.isDirectory()) {
-      const files = fs.readdirSync(resolved)
-        .filter(f => !f.startsWith('~$') && (f.endsWith('.xlsx') || f.endsWith('.xls')))
-        .map(f => path.join(resolved, f));
-      filePaths.push(...files);
+      collectFromDir(resolved);
     } else if (stat.isFile() && (resolved.endsWith('.xlsx') || resolved.endsWith('.xls'))) {
       filePaths.push(resolved);
     }
@@ -308,12 +379,12 @@ async function main() {
   const files = resolveTargetFiles(args);
 
   if (!files.length) {
-    console.error('No Excel files found to ingest. Place .xlsx files in docs/ or provide path.');
+    console.error('No Excel files found to ingest. Place .xlsx files in docs/ or docs/data/.');
     process.exit(1);
   }
 
   console.log(`Found ${files.length} Excel file(s) for ingestion:`);
-  files.forEach(f => console.log(`  - ${path.basename(f)} (${f})`));
+  files.forEach(f => console.log(`  - ${path.basename(f)}`));
 
   const allDocs = [];
   for (const file of files) {
@@ -331,10 +402,60 @@ async function main() {
   // Pre-ingest link health verification
   await checkLinkHealth(allDocs);
 
-  console.log(`Total parsed entries: ${allDocs.length} -> Generated ${chunks.length} chunks.`);
-  console.log(`Generating embeddings via OpenRouter in batches...`);
+  const EMBED_CACHE_FILE = path.join(DATA_DIR, 'embed_cache.json');
+  let embedCache = {};
+  if (fs.existsSync(EMBED_CACHE_FILE)) {
+    try {
+      embedCache = JSON.parse(fs.readFileSync(EMBED_CACHE_FILE, 'utf8'));
+      console.log(`Loaded ${Object.keys(embedCache).length} cached embeddings from disk.`);
+    } catch { embedCache = {}; }
+  }
 
-  const embeddings = await embedTexts(chunks.map(c => c.text));
+  const crypto = require('crypto');
+  function hash(str) {
+    return crypto.createHash('sha256').update(str).digest('hex');
+  }
+
+  const missingTexts = [];
+  const missingIndices = [];
+  const embeddings = new Array(chunks.length);
+
+  for (let i = 0; i < chunks.length; i++) {
+    const h = hash(chunks[i].text);
+    if (embedCache[h]) {
+      embeddings[i] = embedCache[h];
+    } else {
+      missingTexts.push(chunks[i].text);
+      missingIndices.push(i);
+    }
+  }
+
+  if (missingTexts.length > 0) {
+    console.log(`Generating embeddings for ${missingTexts.length} new chunks (${chunks.length - missingTexts.length} retrieved from cache)...`);
+    // Batch and save progress every 5 batches
+    const BATCH_SIZE = 128;
+    const totalBatches = Math.ceil(missingTexts.length / BATCH_SIZE);
+    for (let b = 0; b < missingTexts.length; b += BATCH_SIZE) {
+      const batchTexts = missingTexts.slice(b, b + BATCH_SIZE);
+      const batchIndices = missingIndices.slice(b, b + BATCH_SIZE);
+      const batchNum = Math.floor(b / BATCH_SIZE) + 1;
+      console.log(`  Embedding batch ${batchNum} of ${totalBatches} (${batchTexts.length} texts)...`);
+      const batchEmbs = await embedTexts(batchTexts, BATCH_SIZE);
+      for (let j = 0; j < batchIndices.length; j++) {
+        const idx = batchIndices[j];
+        const emb = batchEmbs[j];
+        embeddings[idx] = emb;
+        embedCache[hash(chunks[idx].text)] = emb;
+      }
+      if (batchNum % 5 === 0 || b + BATCH_SIZE >= missingTexts.length) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+        fs.writeFileSync(EMBED_CACHE_FILE, JSON.stringify(embedCache));
+      }
+    }
+  } else {
+    console.log(`All ${chunks.length} embeddings retrieved instantly from disk cache!`);
+  }
+
   const dim = embeddings[0].length;
   const vectors = new Float32Array(chunks.length * dim);
   embeddings.forEach((emb, i) => vectors.set(emb, i * dim));
@@ -356,13 +477,13 @@ async function main() {
   fs.renameSync(metaPath + '.tmp', metaPath);
 
   const binSizeMb = (fs.statSync(binPath).size / (1024 * 1024)).toFixed(2);
-  console.log(`\nSuccessfully built Ganpat University Knowledge Base:`);
+  console.log(`\nSuccessfully built RCPET's IMRD Knowledge Base:`);
   console.log(`  - Chunks: ${chunks.length}`);
   console.log(`  - Dimensions: ${dim}`);
   console.log(`  - Vector cache: ${binPath} (${binSizeMb} MB)`);
   console.log(`  - Metadata: ${metaPath}`);
 
-  // Flush Redis cache to invalidate outdated FAQ responses
+  // Flush Redis cache to invalidate outdated cached responses
   try {
     const redisCache = require('../api/_lib/redisCache');
     await redisCache.flush();

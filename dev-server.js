@@ -73,7 +73,9 @@ function handleStatic(req, res, url) {
     return res.end('Not found');
   }
   res.setHeader('Content-Type', MIME_TYPES[path.extname(file)] || 'application/octet-stream');
-  if (/\.(css|js|png|jpg|svg|ico|woff2?)$/i.test(file)) {
+  if (/\.(css|js)$/i.test(file)) {
+    res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+  } else if (/\.(png|jpg|svg|ico|woff2?)$/i.test(file)) {
     res.setHeader('Cache-Control', 'public, max-age=3600');
   }
   const stream = fs.createReadStream(file);
@@ -113,5 +115,5 @@ server.on('error', (err) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Ganpat University chatbot running at http://localhost:${PORT}`);
+  console.log(`RCPET's IMRD College chatbot running at http://localhost:${PORT}`);
 });

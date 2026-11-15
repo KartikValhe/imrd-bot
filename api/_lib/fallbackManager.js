@@ -4,7 +4,7 @@
 const LANG_CONFIG = {
   en: { name: 'English', code: 'en' },
   hi: { name: 'Hindi (हिन्दी)', code: 'hi' },
-  gu: { name: 'Gujarati (ગુજરાતી)', code: 'gu' }
+  mr: { name: 'Marathi (मराठी)', code: 'mr' }
 };
 
 // In-memory circuit-breaker state: Map<candidateId, { failures, cooldownUntil, cooldownSec, lastStatus, lastError }>
@@ -62,8 +62,7 @@ function getOpenRouterModels() {
   const primary = (process.env.LLM_MODEL || 'google/gemini-2.5-flash').trim();
   const freeFallbacks = [
     'openrouter/free',
-    'google/gemma-4-26b-a4b-it:free',
-    'meta-llama/llama-3.3-70b-instruct:free',
+    'google/gemini-2.0-flash-lite:free',
     'mistralai/mistral-7b-instruct:free',
     'qwen/qwen-2.5-72b-instruct:free'
   ];
@@ -90,23 +89,7 @@ function buildCandidateList() {
 
   const candidates = [];
 
-  // Tier 1: Primary OpenRouter model with all available OpenRouter keys
-  if (orKeys.length && orModels.length) {
-    const primaryOrModel = orModels[0];
-    orKeys.forEach((key, idx) => {
-      candidates.push({
-        id: `openrouter:${primaryOrModel}:key_${idx}`,
-        provider: 'openrouter',
-        model: primaryOrModel,
-        apiKey: key,
-        keyMask: maskKey(key),
-        tier: 1,
-        description: `OpenRouter (${primaryOrModel}) [Key ${idx + 1}/${orKeys.length} ${maskKey(key)}]`
-      });
-    });
-  }
-
-  // Tier 2: Google Gemini API (independent external provider failover)
+  // Tier 1: Google Gemini API (fast, robust, 1000+ token limit, zero credit cap)
   if (geminiKeys.length && geminiModels.length) {
     const primaryGeminiModel = geminiModels[0];
     geminiKeys.forEach((key, idx) => {
@@ -116,31 +99,13 @@ function buildCandidateList() {
         model: primaryGeminiModel,
         apiKey: key,
         keyMask: maskKey(key),
-        tier: 2,
+        tier: 1,
         description: `Google Gemini API (${primaryGeminiModel}) [Key ${idx + 1}/${geminiKeys.length} ${maskKey(key)}]`
       });
     });
   }
 
-  // Tier 3: OpenRouter Free Models fallback
-  if (orKeys.length && orModels.length > 1) {
-    for (let i = 1; i < orModels.length; i++) {
-      const model = orModels[i];
-      orKeys.forEach((key, idx) => {
-        candidates.push({
-          id: `openrouter:${model}:key_${idx}`,
-          provider: 'openrouter',
-          model,
-          apiKey: key,
-          keyMask: maskKey(key),
-          tier: 3,
-          description: `OpenRouter Free (${model}) [Key ${idx + 1}/${orKeys.length} ${maskKey(key)}]`
-        });
-      });
-    }
-  }
-
-  // Tier 4: Google Gemini Secondary Models (if configured)
+  // Tier 2: Google Gemini Secondary Models
   if (geminiKeys.length && geminiModels.length > 1) {
     for (let i = 1; i < geminiModels.length; i++) {
       const model = geminiModels[i];
@@ -151,8 +116,42 @@ function buildCandidateList() {
           model,
           apiKey: key,
           keyMask: maskKey(key),
-          tier: 4,
+          tier: 2,
           description: `Google Gemini Alternate (${model}) [Key ${idx + 1}/${geminiKeys.length} ${maskKey(key)}]`
+        });
+      });
+    }
+  }
+
+  // Tier 3: Primary OpenRouter model
+  if (orKeys.length && orModels.length) {
+    const primaryOrModel = orModels[0];
+    orKeys.forEach((key, idx) => {
+      candidates.push({
+        id: `openrouter:${primaryOrModel}:key_${idx}`,
+        provider: 'openrouter',
+        model: primaryOrModel,
+        apiKey: key,
+        keyMask: maskKey(key),
+        tier: 3,
+        description: `OpenRouter (${primaryOrModel}) [Key ${idx + 1}/${orKeys.length} ${maskKey(key)}]`
+      });
+    });
+  }
+
+  // Tier 4: OpenRouter Free Models fallback
+  if (orKeys.length && orModels.length > 1) {
+    for (let i = 1; i < orModels.length; i++) {
+      const model = orModels[i];
+      orKeys.forEach((key, idx) => {
+        candidates.push({
+          id: `openrouter:${model}:key_${idx}`,
+          provider: 'openrouter',
+          model,
+          apiKey: key,
+          keyMask: maskKey(key),
+          tier: 4,
+          description: `OpenRouter Free (${model}) [Key ${idx + 1}/${orKeys.length} ${maskKey(key)}]`
         });
       });
     }
@@ -228,7 +227,7 @@ async function callOpenRouter(candidate, messages, temperature, maxTokens, timeo
       'Content-Type': 'application/json',
       'Connection': 'keep-alive',
       'HTTP-Referer': process.env.SITE_URL || 'http://localhost:3000',
-      'X-Title': 'Ganpat University Chatbot'
+      'X-Title': "RCPET's IMRD Assistant"
     },
     body: JSON.stringify({
       model: candidate.model,
@@ -247,6 +246,18 @@ async function callOpenRouter(candidate, messages, temperature, maxTokens, timeo
       const parsed = JSON.parse(errText);
       parsedMessage = parsed.error?.message || '';
     } catch { }
+
+    // Auto-recover from 402 credit threshold ("can only afford X") by retrying with affordable tokens
+    if (res.status === 402 && parsedMessage) {
+      const affordMatch = parsedMessage.match(/can only afford (\d+)/i);
+      if (affordMatch) {
+        const affordVal = parseInt(affordMatch[1], 10);
+        if (affordVal >= 40 && affordVal < maxTokens) {
+          const reducedTokens = Math.max(40, affordVal - 5);
+          return callOpenRouter(candidate, messages, temperature, reducedTokens, timeoutMs, label);
+        }
+      }
+    }
 
     const err = new Error(
       `OpenRouter ${label} failed (${res.status}): ${parsedMessage || errText || res.statusText}`
@@ -358,9 +369,54 @@ async function callGoogleGemini(candidate, messages, temperature, maxTokens, tim
   return content.trim();
 }
 
+// High-concurrency Semaphore: limits simultaneous outgoing calls to LLM APIs
+// to protect against socket exhaustion and provider rate limits under 1000-5000 user surges
+const MAX_CONCURRENT_LLM_CALLS = parseInt(process.env.MAX_CONCURRENT_LLM_CALLS || '40', 10);
+let activeLlmCalls = 0;
+const llmCallQueue = [];
+
+function acquireLlmSlot(timeoutMs = 15000) {
+  if (activeLlmCalls < MAX_CONCURRENT_LLM_CALLS) {
+    activeLlmCalls++;
+    return Promise.resolve();
+  }
+  return new Promise((resolve, reject) => {
+    let timer = null;
+    const entry = () => {
+      if (timer) clearTimeout(timer);
+      activeLlmCalls++;
+      resolve();
+    };
+    timer = setTimeout(() => {
+      const idx = llmCallQueue.indexOf(entry);
+      if (idx !== -1) llmCallQueue.splice(idx, 1);
+      reject(new Error('LLM concurrency queue timeout: system at capacity, please try again.'));
+    }, timeoutMs);
+
+    llmCallQueue.push(entry);
+  });
+}
+
+function releaseLlmSlot() {
+  activeLlmCalls--;
+  if (llmCallQueue.length > 0) {
+    const next = llmCallQueue.shift();
+    if (next) next();
+  }
+}
+
 // ── 6. MAIN FALLBACK EXECUTION ENGINE ─────────────────────────────────────────
 
-async function generateChatCompletion({
+async function generateChatCompletion(params) {
+  await acquireLlmSlot();
+  try {
+    return await executeChatCompletion(params);
+  } finally {
+    releaseLlmSlot();
+  }
+}
+
+async function executeChatCompletion({
   messages,
   temperature = 0.2,
   maxTokens = 350,
@@ -429,9 +485,9 @@ async function generateChatCompletion({
 
   // Return a graceful, user-friendly fallback message without exposing stack traces or API keys
   const friendlyRefusals = {
-    en: "I apologize, but our AI campus assistant is currently experiencing high query volumes or momentary network delays. Please try asking again in a few moments, or visit the official [Ganpat University Website](https://www.ganpatuniversity.ac.in).",
-    hi: "क्षमा करें, वर्तमान में हमारे एआई कैंपस सहायक पर अधिक ट्रैफिक या तकनीकी समस्या है। कृपया कुछ पलों बाद पुनः प्रयास करें या [गणपत यूनिवर्सिटी की आधिकारिक वेबसाइट](https://www.ganpatuniversity.ac.in) देखें।",
-    gu: "દિલગીર છીએ, હાલમાં અમારા AI કેમ્પસ સહાયક પર વધુ ટ્રાફિક અથવા નેટવર્ક સમસ્યા છે. કૃપા કરીને થોડીવાર પછી ફરીથી પ્રયાસ કરો અથવા [ગણપત યુનિવર્સિટીની સત્તાવાર વેબસાઇટ](https://www.ganpatuniversity.ac.in) ની મુલાકાત લો."
+    en: "I apologize, but our AI campus assistant is currently experiencing high query volumes or momentary network delays. Please try asking again in a few moments, or visit the official [RCPET's IMRD Website](https://www.rcpimrd.ac.in).",
+    hi: "क्षमा करें, वर्तमान में हमारे एआई कैंपस सहायक पर अधिक ट्रैफिक या तकनीकी समस्या है। कृपया कुछ पलों बाद पुनः प्रयास करें या [RCPET IMRD की आधिकारिक वेबसाइट](https://www.rcpimrd.ac.in) देखें।",
+    mr: "क्षमस्व, सध्या आमच्या AI कॅम्पस सहाय्यकावर जास्त ट्रॅफिक किंवा तांत्रिक समस्या आहे. कृपया थोड्या वेळाने पुन्हा प्रयत्न करा किंवा [RCPET's IMRD अधिकृत संकेतस्थळ](https://www.rcpimrd.ac.in) ला भेट द्या."
   };
 
   return {

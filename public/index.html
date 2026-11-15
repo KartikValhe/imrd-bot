@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>AI Assistant – Ganpat University</title>
+    <title>AI Assistant – RCPET's IMRD College</title>
     <meta name="description"
-        content="Ganpat University AI Chatbot — powered by RAG for instant answers on admissions, fees, and college life.">
+        content="RCPET's IMRD AI Chatbot — powered by RAG for instant answers on admissions, courses, fees, and campus life.">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,7 +20,7 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- App Styles -->
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/styles.css?v=2.2">
 </head>
 
 <body>
@@ -63,25 +63,39 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         crossorigin="anonymous"></script>
 
+    <script>
+        // Proactively purge any legacy Ganpat University data from browser localStorage
+        try {
+            const legacyKeys = ['chat_history_v1', 'guni_chat_history_v1', 'guni_chat_conversations', 'chat_history', 'guni_language'];
+            legacyKeys.forEach(k => localStorage.removeItem(k));
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('guni_') || key.includes('ganpat'))) {
+                    localStorage.removeItem(key);
+                }
+            }
+        } catch (e) {}
+    </script>
+
     <!-- App Constants & Translations -->
-    <script src="/js/constants/i18n.js"></script>
+    <script src="/js/constants/i18n.js?v=2.2"></script>
 
     <!-- React Components (loaded in dependency order) -->
-    <script type="text/babel" src="/js/components/BackgroundCanvas.js"></script>
-    <script type="text/babel" src="/js/components/SidebarBrand.js"></script>
-    <script type="text/babel" src="/js/components/ChatHistoryItem.js"></script>
-    <script type="text/babel" src="/js/components/ChatHistoryList.js"></script>
-    <script type="text/babel" src="/js/components/UserCard.js"></script>
-    <script type="text/babel" src="/js/components/Sidebar.js"></script>
-    <script type="text/babel" src="/js/components/LanguageToggle.js"></script>
-    <script type="text/babel" src="/js/components/ChatHeader.js"></script>
-    <script type="text/babel" src="/js/components/WelcomeCard.js"></script>
-    <script type="text/babel" src="/js/components/MessageRow.js"></script>
-    <script type="text/babel" src="/js/components/TypingIndicator.js"></script>
-    <script type="text/babel" src="/js/components/ChatBody.js"></script>
-    <script type="text/babel" src="/js/components/ChatFooter.js"></script>
-    <script type="text/babel" src="/js/components/ChatPanel.js"></script>
-    <script type="text/babel" src="/js/components/App.js"></script>
+    <script type="text/babel" src="/js/components/BackgroundCanvas.js?v=2.2"></script>
+    <script type="text/babel" src="/js/components/SidebarBrand.js?v=2.2"></script>
+    <script type="text/babel" src="/js/components/ChatHistoryItem.js?v=2.2"></script>
+    <script type="text/babel" src="/js/components/ChatHistoryList.js?v=2.2"></script>
+    <script type="text/babel" src="/js/components/UserCard.js?v=2.2"></script>
+    <script type="text/babel" src="/js/components/Sidebar.js?v=2.2"></script>
+    <script type="text/babel" src="/js/components/LanguageToggle.js?v=2.2"></script>
+    <script type="text/babel" src="/js/components/ChatHeader.js?v=2.2"></script>
+    <script type="text/babel" src="/js/components/WelcomeCard.js?v=2.2"></script>
+    <script type="text/babel" src="/js/components/MessageRow.js?v=2.2"></script>
+    <script type="text/babel" src="/js/components/TypingIndicator.js?v=2.2"></script>
+    <script type="text/babel" src="/js/components/ChatBody.js?v=2.2"></script>
+    <script type="text/babel" src="/js/components/ChatFooter.js?v=2.2"></script>
+    <script type="text/babel" src="/js/components/ChatPanel.js?v=2.2"></script>
+    <script type="text/babel" src="/js/components/App.js?v=2.2"></script>
 
 </body>
 

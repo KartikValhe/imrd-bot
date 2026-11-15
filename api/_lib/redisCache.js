@@ -6,15 +6,15 @@
 const crypto = require('crypto');
 
 const DEFAULT_TTL_SECONDS = parseInt(process.env.REDIS_CACHE_TTL || '86400', 10); // 24 hours
-const KEY_PREFIX = 'guni:qa:';
+const KEY_PREFIX = 'imrd:qa:';
 
 class RedisCacheManager {
   constructor() {
     this.mode = 'none';
     this.client = null;
     this.memoryCache = new Map();
-    this.maxMemoryItems = 1000;
-    this.stats = { hits: 0, misses: 0 };
+    this.maxMemoryItems = 5000; // Increased for handling 1000-5000 concurrent users
+    this.stats = { hits: 0, misses: 0, l1Hits: 0, l2Hits: 0 };
     this.initClient();
   }
 
@@ -110,6 +110,20 @@ class RedisCacheManager {
     const t0 = Date.now();
 
     try {
+      // 1. Tier 1: Instant In-Memory RAM Cache (0.05ms - zero network overhead)
+      const l1Item = this.memoryCache.get(key);
+      if (l1Item) {
+        if (l1Item.expiresAt > Date.now()) {
+          this.stats.hits++;
+          this.stats.l1Hits++;
+          const parsed = typeof l1Item.value === 'string' ? JSON.parse(l1Item.value) : l1Item.value;
+          return parsed;
+        } else {
+          this.memoryCache.delete(key);
+        }
+      }
+
+      // 2. Tier 2: Distributed Redis Cache (Upstash REST or ioredis TCP)
       let rawData = null;
 
       if (this.mode === 'upstash-rest') {
@@ -123,23 +137,25 @@ class RedisCacheManager {
         }
       } else if (this.mode === 'ioredis' && this.client && this.client.status === 'ready') {
         rawData = await this.client.get(key);
-      } else {
-        // In-memory lookup
-        const item = this.memoryCache.get(key);
-        if (item) {
-          if (item.expiresAt > Date.now()) {
-            rawData = item.value;
-          } else {
-            this.memoryCache.delete(key);
-          }
-        }
       }
 
       if (rawData) {
         const parsed = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
         this.stats.hits++;
+        this.stats.l2Hits++;
+
+        // Backfill L1 Memory Cache for subsequent requests by other concurrent users
+        if (this.memoryCache.size >= this.maxMemoryItems) {
+          const oldestKey = this.memoryCache.keys().next().value;
+          this.memoryCache.delete(oldestKey);
+        }
+        this.memoryCache.set(key, {
+          value: rawData,
+          expiresAt: Date.now() + (DEFAULT_TTL_SECONDS * 1000)
+        });
+
         const elapsedMs = Date.now() - t0;
-        console.log(`⚡ [Cache HIT] (${this.mode}, ${elapsedMs}ms) Key: ${key} -> "${queryText.slice(0, 45)}"`);
+        console.log(`⚡ [Cache HIT L2] (${this.mode}, ${elapsedMs}ms) Key: ${key} -> "${queryText.slice(0, 45)}"`);
         return parsed;
       }
     } catch (err) {
