@@ -8,7 +8,7 @@ window.GUNi.App = function App() {
 
     // ── 1. Language State ─────────────────────────────────────────────────────
     const [currentLanguage, setCurrentLanguage] = useState(() => {
-        const saved = localStorage.getItem('guni_language');
+        const saved = localStorage.getItem('imrd_language') || localStorage.getItem('guni_language');
         return I18N[saved] ? saved : 'en';
     });
     const t = I18N[currentLanguage] || I18N.en || {};
@@ -16,7 +16,7 @@ window.GUNi.App = function App() {
     const handleLanguageChange = (lang) => {
         if (I18N[lang]) {
             setCurrentLanguage(lang);
-            localStorage.setItem('guni_language', lang);
+            localStorage.setItem('imrd_language', lang);
         }
     };
 
@@ -101,15 +101,36 @@ window.GUNi.App = function App() {
     }, [isResizing]);
 
     // ── 3. Chat History & Active Conversation ─────────────────────────────────
-    const HISTORY_KEY = 'chat_history_v1';
+    const HISTORY_KEY = 'imrd_chat_history_v2';
     const MAX_CONVERSATIONS = 50;
     const HISTORY_TURNS_LIMIT = 10;
 
+    // Reject and purge any legacy Ganpat University chats
+    const isLegacyGanpatChat = (item) => {
+        if (!item) return false;
+        const textToTest = `${item.title || ''} ${(item.messages || []).map(m => m.text || '').join(' ')}`.toLowerCase();
+        return /ganpat|guni|kherva|mehsana|ગણપત|गणपत|[\u0A80-\u0AFF]/i.test(textToTest);
+    };
+
     const [conversations, setConversations] = useState(() => {
         try {
+            // Clean up old legacy Ganpat history keys from localStorage
+            try {
+                localStorage.removeItem('chat_history_v1');
+                localStorage.removeItem('guni_chat_history_v1');
+                localStorage.removeItem('guni_chat_conversations');
+            } catch {}
+
             const raw = localStorage.getItem(HISTORY_KEY);
+            if (!raw) return [];
             const parsed = JSON.parse(raw);
-            return Array.isArray(parsed) ? parsed : [];
+            if (!Array.isArray(parsed)) return [];
+            return parsed
+                .filter(c => c && typeof c === 'object' && !isLegacyGanpatChat(c))
+                .map(c => ({
+                    ...c,
+                    messages: Array.isArray(c.messages) ? c.messages : []
+                }));
         } catch {
             return [];
         }
@@ -123,10 +144,11 @@ window.GUNi.App = function App() {
     const [lastUserMessage, setLastUserMessage] = useState('');
     const abortControllerRef = useRef(null);
 
-    // Persist conversations to localStorage
+    // Persist conversations to localStorage (never storing Ganpat conversations)
     useEffect(() => {
         try {
-            localStorage.setItem(HISTORY_KEY, JSON.stringify(conversations.slice(0, MAX_CONVERSATIONS)));
+            const clean = conversations.filter(c => !isLegacyGanpatChat(c));
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(clean.slice(0, MAX_CONVERSATIONS)));
         } catch {}
     }, [conversations]);
 
@@ -189,7 +211,8 @@ window.GUNi.App = function App() {
         const conv = conversations.find((c) => c.id === id);
         if (!conv) return;
         setActiveChatId(id);
-        setMessages(conv.messages || []);
+        const safeMessages = Array.isArray(conv.messages) ? conv.messages : [];
+        setMessages(safeMessages);
         setIsTyping(false);
         closeMobileSidebar();
     };
@@ -201,7 +224,7 @@ window.GUNi.App = function App() {
         }
     };
 
-    const handleSend = async (customText) => {
+    const handleSend = async (customText, overrideBaseMessages = null) => {
         const text = (customText != null ? customText : inputText).trim();
         if (!text || isSending) return;
 
@@ -225,8 +248,11 @@ window.GUNi.App = function App() {
             setActiveChatId(convId);
         }
 
-        // Optimistically append user message to current view
-        const updatedMessages = [...messages, userMsg];
+        // Optimistically append user message using overrideBaseMessages if provided (avoids React stale closure)
+        const baseList = Array.isArray(overrideBaseMessages)
+            ? overrideBaseMessages
+            : (Array.isArray(messages) ? messages : []);
+        const updatedMessages = [...baseList, userMsg];
         setMessages(updatedMessages);
         setIsTyping(true);
 
@@ -242,9 +268,12 @@ window.GUNi.App = function App() {
                 };
                 return [conv, ...prev.filter((c) => c.id !== convId)];
             }
+            const currentConvMsgs = Array.isArray(overrideBaseMessages)
+                ? overrideBaseMessages
+                : (Array.isArray(conv.messages) ? conv.messages : []);
             const nextConv = {
                 ...conv,
-                messages: [...(conv.messages || []), userMsg],
+                messages: [...currentConvMsgs, userMsg],
                 updatedAt: Date.now()
             };
             return [nextConv, ...prev.filter((c) => c.id !== convId)];
@@ -295,7 +324,7 @@ window.GUNi.App = function App() {
                         if (c.id === convId) {
                             return {
                                 ...c,
-                                messages: [...(c.messages || []), aiMsg],
+                                messages: [...(Array.isArray(c.messages) ? c.messages : []), aiMsg],
                                 updatedAt: Date.now()
                             };
                         }
@@ -357,16 +386,17 @@ window.GUNi.App = function App() {
 
     const handleRegenerate = (msgIndex) => {
         if (isSending) return;
+        const currentList = Array.isArray(messages) ? messages : [];
         const targetIdx = (msgIndex !== undefined && msgIndex !== null)
             ? msgIndex
-            : messages.length - 1;
+            : currentList.length - 1;
 
         let userMsgText = '';
         let userMsgIndex = -1;
 
         for (let i = targetIdx; i >= 0; i--) {
-            if (messages[i]?.sender === 'user') {
-                userMsgText = messages[i].text;
+            if (currentList[i]?.sender === 'user') {
+                userMsgText = currentList[i].text;
                 userMsgIndex = i;
                 break;
             }
@@ -374,8 +404,8 @@ window.GUNi.App = function App() {
 
         if (!userMsgText || userMsgIndex === -1) return;
 
-        // Keep messages before the user message, then re-send
-        const remaining = messages.slice(0, userMsgIndex);
+        // Keep messages strictly BEFORE the user message
+        const remaining = currentList.slice(0, userMsgIndex);
         setMessages(remaining);
 
         if (activeChatId) {
@@ -384,7 +414,7 @@ window.GUNi.App = function App() {
                     if (c.id === activeChatId) {
                         return {
                             ...c,
-                            messages: (c.messages || []).slice(0, userMsgIndex),
+                            messages: (Array.isArray(c.messages) ? c.messages : []).slice(0, userMsgIndex),
                             updatedAt: Date.now()
                         };
                     }
@@ -393,7 +423,8 @@ window.GUNi.App = function App() {
             });
         }
 
-        handleSend(userMsgText);
+        // Pass remaining directly to eliminate React stale closure bugs
+        handleSend(userMsgText, remaining);
     };
 
     const handleSelectChip = (chipText) => {
@@ -401,15 +432,16 @@ window.GUNi.App = function App() {
     };
 
     const handleEditSubmit = (msgIndex, newText) => {
-        // Keep messages up to edited index
-        const remaining = messages.slice(0, msgIndex);
+        const currentList = Array.isArray(messages) ? messages : [];
+        // Keep messages strictly up to edited index
+        const remaining = currentList.slice(0, msgIndex);
         setMessages(remaining);
 
         if (activeChatId) {
             setConversations((prev) => {
                 return prev.map((c) => {
                     if (c.id === activeChatId) {
-                        const newMsgList = (c.messages || []).slice(0, msgIndex);
+                        const newMsgList = (Array.isArray(c.messages) ? c.messages : []).slice(0, msgIndex);
                         return {
                             ...c,
                             title: msgIndex === 0 ? newText.slice(0, 60) : c.title,
@@ -422,7 +454,8 @@ window.GUNi.App = function App() {
             });
         }
 
-        handleSend(newText);
+        // Pass remaining directly to eliminate React stale closure bugs
+        handleSend(newText, remaining);
     };
 
     const handleRetry = () => {
@@ -563,7 +596,7 @@ class ErrorBoundary extends React.Component {
                         onClick={() => window.location.reload()}
                         style={{
                             padding: '0.65rem 1.4rem',
-                            background: '#9c4126',
+                            background: '#003366',
                             color: '#ffffff',
                             border: 'none',
                             borderRadius: '8px',

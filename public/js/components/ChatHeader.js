@@ -18,7 +18,7 @@ window.GUNi.ChatHeader = function ChatHeader({ onToggleSidebar, currentLanguage,
                 <div className="header-badge">
                     <span className="status-pulse-dot"></span>
                     <span className="header-badge-text" id="ui-header-title">
-                        {t?.title || 'GUNi Assistant'}
+                        {t?.title || 'IMRD Assistant'}
                     </span>
                 </div>
             </div>

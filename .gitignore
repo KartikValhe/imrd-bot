@@ -24,6 +24,7 @@ build/
 *.bak
 data/*.tmp
 data/*.temp
+data/embed_cache.json
 ~$*.xlsx
 ~$*.xls
 
