@@ -157,17 +157,6 @@ window.GUNi.ChatFooter = function ChatFooter({
                         onKeyDown={handleKeyDown}
                         disabled={isSending}
                     />
-                    {inputText && !isSending && (
-                        <button
-                            type="button"
-                            className="input-clear-btn"
-                            title={t?.clearInput || "Clear input"}
-                            aria-label={t?.clearInput || "Clear input"}
-                            onClick={() => setInputText('')}
-                        >
-                            <i className="bi bi-x"></i>
-                        </button>
-                    )}
                     <button
                         type="button"
                         className={`input-action-btn${isListening ? ' listening' : ''}`}
