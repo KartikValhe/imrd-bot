@@ -1399,14 +1399,23 @@ body {
     box-sizing: border-box;
 }
 
+.chat-input:placeholder-shown {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    overflow-y: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
 .chat-input::placeholder,
 .chat-input::-webkit-input-placeholder,
-.chat-input::-moz-placeholder {
+.chat-input::-moz-placeholder,
+.chat-input:-ms-input-placeholder {
     color: #94a3b8;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     line-height: inherit;
+    display: block;
 }
 
 .input-clear-btn {
@@ -1843,6 +1852,14 @@ body {
         min-height: 36px;
     }
 
+    .chat-input:placeholder-shown {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        overflow-y: hidden !important;
+        text-overflow: ellipsis !important;
+        height: 36px !important;
+    }
+
     .input-action-btn,
     .send-btn {
         width: 36px;
@@ -2108,6 +2125,14 @@ body {
         min-height: 36px;
     }
 
+    .chat-input:placeholder-shown {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        overflow-y: hidden !important;
+        text-overflow: ellipsis !important;
+        height: 36px !important;
+    }
+
     .input-action-btn,
     .send-btn {
         width: 34px;
@@ -2145,6 +2170,14 @@ body {
         height: 34px;
         min-height: 34px;
         padding: 6px 0;
+    }
+
+    .chat-input:placeholder-shown {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        overflow-y: hidden !important;
+        text-overflow: ellipsis !important;
+        height: 34px !important;
     }
 
     .input-action-btn,

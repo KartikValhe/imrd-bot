@@ -48,7 +48,7 @@ window.I18N = {
                 query: 'Where is RCPET IMRD located and how do I contact the college?'
             }
         ],
-        inputPlaceholder: "Ask anything about RCPET's IMRD…",
+        inputPlaceholder: "Ask about RCPET's IMRD…",
         inputPlaceholderMobile: "Ask about RCPET's IMRD…",
         newChat: 'New chat',
         recentChats: 'Recent Chats',
@@ -129,7 +129,7 @@ window.I18N = {
                 query: 'RCPET IMRD कहाँ स्थित है और कॉलेज से कैसे संपर्क करें?'
             }
         ],
-        inputPlaceholder: 'RCPET IMRD के बारे में कुछ भी पूछें…',
+        inputPlaceholder: 'RCPET IMRD से कुछ भी पूछें…',
         inputPlaceholderMobile: 'IMRD के बारे में पूछें…',
         newChat: 'नई चैट',
         recentChats: 'हालिया चैट',
@@ -210,7 +210,7 @@ window.I18N = {
                 query: 'RCPET IMRD कुठे आहे आणि कॉलेजशी कसा संपर्क साधावा?'
             }
         ],
-        inputPlaceholder: "RCPET IMRD बद्दल काहीही विचारा…",
+        inputPlaceholder: "RCPET IMRD ला काहीही विचारा…",
         inputPlaceholderMobile: "IMRD बद्दल विचारा…",
         newChat: 'नवीन संभाषण',
         recentChats: 'मागील संभाषणे',

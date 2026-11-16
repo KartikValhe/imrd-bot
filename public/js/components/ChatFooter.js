@@ -39,6 +39,8 @@ window.GUNi.ChatFooter = function ChatFooter({
         // When input is empty, reset inline height so CSS controls clean single-line sizing
         if (!inputText) {
             el.style.height = '';
+            el.scrollTop = 0;
+            el.scrollLeft = 0;
             return;
         }
 
@@ -160,9 +162,9 @@ window.GUNi.ChatFooter = function ChatFooter({
     const isMultiline = Boolean(inputText && inputText.includes('\n'));
     const placeholderText = isListening
         ? (t?.voiceListening || '🎙️ Listening…')
-        : (isMobile && t?.inputPlaceholderMobile
-            ? t.inputPlaceholderMobile
-            : (t?.inputPlaceholder || "Ask anything about RCPET's IMRD…"));
+        : (isMobile
+            ? (t?.inputPlaceholderMobile || t?.inputPlaceholder || "Ask about RCPET's IMRD…")
+            : (t?.inputPlaceholder || t?.inputPlaceholderMobile || "Ask about RCPET's IMRD…"));
 
     return (
         <footer className="chat-footer">
